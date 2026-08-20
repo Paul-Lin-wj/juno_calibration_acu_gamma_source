@@ -7,7 +7,8 @@ TMP/
 *.egg-info/
 
 # Output (runtime results)
-output/
+output/*
+!output/example/
 
 # IDE
 .vscode/
