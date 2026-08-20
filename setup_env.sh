@@ -22,12 +22,7 @@ fi
 
 echo "[Info] Installing dependencies..."
 "${VENV_DIR}/bin/pip" install --quiet --upgrade pip
-"${VENV_DIR}/bin/pip" install --quiet \
-    numpy \
-    scipy \
-    matplotlib \
-    iminuit \
-    pandas
+"${VENV_DIR}/bin/pip" install --quiet -r requirements.txt
 
 echo "[Info] Done. Virtual environment is ready."
 echo ""
