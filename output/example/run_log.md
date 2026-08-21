@@ -1,8 +1,10 @@
-# Run Log — JUNO Calibration Fitter Pipeline
+# Run Log — JUNO Calibration Fitter Pipeline (v2.0)
 
+**Run ID**: `20260821T133224_d3fdc7c4`
+**Status**: `completed`
 **Launched by**: `script`
-**Start time**: 2026-08-21 10:57:59 CST
-**End time**:   2026-08-21 10:58:08 CST
+**Start (UTC)**: 2026-08-21T05:32:24.336176Z
+**End (UTC)**:   2026-08-21T05:32:32.767730Z
 
 ## System Information
 
@@ -17,11 +19,11 @@
 
 | Field | Value |
 |-------|-------|
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Git commit | `e61e274fb878d2dbb2b2b158643575fd38a1030a` |
 | Git branch | `main` |
 | Uncommitted changes | `True` |
 
-> ⚠️ Warning: Working tree has uncommitted changes.
+> Warning: Working tree has uncommitted changes.
 
 ## Package Versions
 
@@ -33,243 +35,219 @@
 
 ## Configuration Files
 
-| Config | Path |
-|-------|------|
-| paths_py | `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/config/paths.py` |
-| calib_run_csv | `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/CalibRUN.csv` |
+| Config | Path | SHA-256 |
+|-------|------|--------|
+| paths_py | `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/config/paths.py` | `477ee5913819bf39...` |
+| calib_run_csv | `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/CalibRUN.csv` | `84d39f499b8b560a...` |
+| requirements_txt | `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/requirements.txt` | `0351e588f90a087a...` |
 
 ---
 ## Per-Source Records
 
-### Ge68 — RUN9541
+### [OK] Ge68 — RUN12370
 
 | Field | Value |
 |-------|-------|
+| Status | success |
 | Source | Ge68 |
-| Run | 9541 |
-| Date | 2025-08-24 |
-| Position (X,Y,Z) | (0.0, 0.0, 0.0) m |
+| Run | 12370 |
+| Date | 2025-12-17 |
+| Position | (0.0, 0.0, 0.0) m |
 | E_true | 0.8845 MeV |
-| Fitter type | `fast` |
-| Fitter file | `src/FastGe68Fitter.py` |
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Fitter | `fast` |
 
 #### Input Data
 
 | Field | Value |
 |-------|-------|
-| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9541_SelectionResult.npz` |
-| Size | 554,510 bytes (542 KB) |
-| Format | `.npz` |
+| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12370_SelectionResult.npz` |
+| Size | 2,622,422 bytes |
+| SHA-256 | `875b1662638ca16a...` |
 
-#### Event Statistics
+#### Events
 
 | Field | Value |
 |-------|-------|
-| Total events | 23049 |
-| Finite events | 23049 |
-| Energy range | 0.0000 – 3.7519 MeV |
-| Energy mean | 0.8230 MeV |
-| Energy median | 0.8871 MeV |
+| Total | 109212 |
+| Energy range | 0.0000 - 11.6899 MeV |
 
 #### Fit Results
 
 | Field | Value |
 |-------|-------|
-| Mu (μ) | 0.9056 MeV |
-| Sigma (σ) | 0.0314 MeV |
-| σ/E | 3.47% |
-| χ²/ndf | 380.4/351 |
-| Timing | 4.9s |
+| Mu | 0.9102 MeV |
+| Sigma/E | 3.54% |
+| Chi2/ndf | 600.2/358 |
+| Time | 4.6s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/results/RUN9541_Ge68.npz`
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/figures/RUN9541_Ge68.pdf`
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12370_Ge68.npz` (SHA-256: `0247b0f4584e...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12370_Ge68.pdf` (SHA-256: `49608ae4a359...`)
 
-### Cs137 — RUN9600
+### [OK] Cs137 — RUN12295
 
 | Field | Value |
 |-------|-------|
+| Status | success |
 | Source | Cs137 |
-| Run | 9600 |
-| Date | 2025-08-25 |
-| Position (X,Y,Z) | (0.0, 0.0, 0.0) m |
+| Run | 12295 |
+| Date | 2025-12-16 |
+| Position | (0.0, 0.0, 0.0) m |
 | E_true | 0.6620 MeV |
-| Fitter type | `fast` |
-| Fitter file | `src/FastSourceFitter.py` |
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Fitter | `fast` |
 
 #### Input Data
 
 | Field | Value |
 |-------|-------|
-| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9600_SelectionResult.npz` |
-| Size | 3,124,166 bytes (3051 KB) |
-| Format | `.npz` |
+| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12295_SelectionResult.npz` |
+| Size | 3,028,142 bytes |
+| SHA-256 | `57103a9631b0f699...` |
 
-#### Event Statistics
+#### Events
 
 | Field | Value |
 |-------|-------|
-| Total events | 130118 |
-| Finite events | 130118 |
-| Energy range | 0.0000 – 5.2042 MeV |
-| Energy mean | 0.5558 MeV |
-| Energy median | 0.5937 MeV |
+| Total | 126117 |
+| Energy range | 0.0000 - 11.5701 MeV |
 
 #### Fit Results
 
 | Field | Value |
 |-------|-------|
-| Mu (μ) | 0.5992 MeV |
-| Sigma (σ) | 0.0258 MeV |
-| σ/E | 4.31% |
-| χ²/ndf | 222.2/124 |
-| Timing | 0.8s |
+| Mu | 0.6034 MeV |
+| Sigma/E | 4.40% |
+| Chi2/ndf | 226.2/122 |
+| Time | 0.6s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/results/RUN9600_Cs137.npz`
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/figures/RUN9600_Cs137.pdf`
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12295_Cs137.npz` (SHA-256: `edea029c1b4f...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12295_Cs137.pdf` (SHA-256: `3a083310f85b...`)
 
-### Mn54 — RUN9624
+### [OK] Mn54 — RUN12247
 
 | Field | Value |
 |-------|-------|
+| Status | success |
 | Source | Mn54 |
-| Run | 9624 |
-| Date | 2025-08-25 |
-| Position (X,Y,Z) | (0.0, 0.0, 0.0) m |
+| Run | 12247 |
+| Date | 2025-12-15 |
+| Position | (0.0, 0.0, 0.0) m |
 | E_true | 0.8350 MeV |
-| Fitter type | `fast` |
-| Fitter file | `src/FastSourceFitter.py` |
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Fitter | `fast` |
 
 #### Input Data
 
 | Field | Value |
 |-------|-------|
-| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9624_SelectionResult.npz` |
-| Size | 1,283,942 bytes (1254 KB) |
-| Format | `.npz` |
+| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12247_SelectionResult.npz` |
+| Size | 1,004,750 bytes |
+| SHA-256 | `83ce89e9420ff3c8...` |
 
-#### Event Statistics
+#### Events
 
 | Field | Value |
 |-------|-------|
-| Total events | 53442 |
-| Finite events | 53442 |
-| Energy range | 0.0000 – 4.3135 MeV |
-| Energy mean | 0.6878 MeV |
-| Energy median | 0.7650 MeV |
+| Total | 41809 |
+| Energy range | 0.0000 - 9.1776 MeV |
 
 #### Fit Results
 
 | Field | Value |
 |-------|-------|
-| Mu (μ) | 0.7734 MeV |
-| Sigma (σ) | 0.0296 MeV |
-| σ/E | 3.83% |
-| χ²/ndf | 140.7/108 |
-| Timing | 0.7s |
+| Mu | 0.7780 MeV |
+| Sigma/E | 3.92% |
+| Chi2/ndf | 148.6/111 |
+| Time | 0.6s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/results/RUN9624_Mn54.npz`
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/figures/RUN9624_Mn54.pdf`
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12247_Mn54.npz` (SHA-256: `d2059fed24e8...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12247_Mn54.pdf` (SHA-256: `76f8fca9f5e5...`)
 
-### Co60 — RUN9591
+### [OK] Co60 — RUN12216
 
 | Field | Value |
 |-------|-------|
+| Status | success |
 | Source | Co60 |
-| Run | 9591 |
-| Date | 2025-08-24 |
-| Position (X,Y,Z) | (0.0, 0.0, 0.0) m |
+| Run | 12216 |
+| Date | 2025-12-15 |
+| Position | (0.0, 0.0, 0.0) m |
 | E_true | 2.5060 MeV |
-| Fitter type | `fast` |
-| Fitter file | `src/FastSourceFitter.py` |
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Fitter | `fast` |
 
 #### Input Data
 
 | Field | Value |
 |-------|-------|
-| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9591_SelectionResult.npz` |
-| Size | 2,694,134 bytes (2631 KB) |
-| Format | `.npz` |
+| File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12216_SelectionResult.npz` |
+| Size | 2,580,518 bytes |
+| SHA-256 | `317a6e726591fbe0...` |
 
-#### Event Statistics
+#### Events
 
 | Field | Value |
 |-------|-------|
-| Total events | 112200 |
-| Finite events | 112200 |
-| Energy range | 0.0000 – 4.7868 MeV |
-| Energy mean | 2.1822 MeV |
-| Energy median | 2.3821 MeV |
+| Total | 107466 |
+| Energy range | 0.0000 - 9.1696 MeV |
 
 #### Fit Results
 
 | Field | Value |
 |-------|-------|
-| Mu (μ) | 2.4062 MeV |
-| Sigma (σ) | 0.0545 MeV |
-| σ/E | 2.26% |
-| χ²/ndf | 244.1/182 |
-| Timing | 0.8s |
+| Mu | 2.4113 MeV |
+| Sigma/E | 2.34% |
+| Chi2/ndf | 254.8/183 |
+| Time | 0.6s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/results/RUN9591_Co60.npz`
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/figures/RUN9591_Co60.pdf`
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12216_Co60.npz` (SHA-256: `48b340520a55...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12216_Co60.pdf` (SHA-256: `11b75e1efb1b...`)
 
-### K40 — RUN9632
+### [OK] K40 — RUN9632
 
 | Field | Value |
 |-------|-------|
+| Status | success |
 | Source | K40 |
 | Run | 9632 |
 | Date | 2025-08-25 |
-| Position (X,Y,Z) | (0.0, 0.0, 0.0) m |
+| Position | (0.0, 0.0, 0.0) m |
 | E_true | 1.4610 MeV |
-| Fitter type | `fast` |
-| Fitter file | `src/FastSourceFitter.py` |
-| Git commit | `5e1cdabc2457cc6f99936d9ca34ccecbb269a3b3` |
+| Fitter | `fast` |
 
 #### Input Data
 
 | Field | Value |
 |-------|-------|
 | File | `/lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9632_SelectionResult.npz` |
-| Size | 703,046 bytes (687 KB) |
-| Format | `.npz` |
+| Size | 703,046 bytes |
+| SHA-256 | `21da388b126da04f...` |
 
-#### Event Statistics
+#### Events
 
 | Field | Value |
 |-------|-------|
-| Total events | 29238 |
-| Finite events | 29238 |
-| Energy range | 0.0000 – 14.0353 MeV |
-| Energy mean | 0.5214 MeV |
-| Energy median | 0.1907 MeV |
+| Total | 29238 |
+| Energy range | 0.0000 - 14.0353 MeV |
 
 #### Fit Results
 
 | Field | Value |
 |-------|-------|
-| Mu (μ) | 1.4158 MeV |
-| Sigma (σ) | 0.0422 MeV |
-| σ/E | 2.98% |
-| χ²/ndf | 154.4/145 |
-| Timing | 0.6s |
+| Mu | 1.4158 MeV |
+| Sigma/E | 2.98% |
+| Chi2/ndf | 154.4/145 |
+| Time | 0.5s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/results/RUN9632_K40.npz`
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759/figures/RUN9632_K40.pdf`
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN9632_K40.npz` (SHA-256: `41ccea147e2e...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN9632_K40.pdf` (SHA-256: `a6fb87b19326...`)
 
 ---
 ## Summary
@@ -278,10 +256,9 @@
 |-------|-------|
 | total_sources_configured | 5 |
 | total_sources_fitted | 5 |
-| total_time_s | 8.9 |
-| total_time_min | 0.1 |
+| total_time_s | 8.2 |
 | sources | Ge68, Cs137, Mn54, Co60, K40 |
-| output_directory | /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_105759 |
+| output_directory | /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224 |
 
 ---
 *End of run log*

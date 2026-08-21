@@ -1,10 +1,12 @@
 """
 Comprehensive run logger for the JUNO calibration fitter pipeline.
-Captures every detail needed for third-party audit and traceability.
+Implements audit-grade logging with SHA-256 fingerprints, status tracking,
+context manager safety, and agent workflow recording.
 """
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import os
 import platform
@@ -12,14 +14,40 @@ import socket
 import subprocess
 import sys
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
 import numpy as np
 
+SCHEMA_VERSION = "2.0"
 
-def _get_git_commit(project_root: str | Path) -> str:
+
+def sha256_file(path):
+    try:
+        h = hashlib.sha256()
+        with open(path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                h.update(chunk)
+        return h.hexdigest()
+    except Exception:
+        return "unavailable"
+
+
+def file_info(path):
+    p = Path(path)
+    info = {"path": str(p.resolve()), "exists": p.exists()}
+    if p.exists():
+        info["size_bytes"] = p.stat().st_size
+        info["sha256"] = sha256_file(p)
+    else:
+        info["size_bytes"] = 0
+        info["sha256"] = None
+    return info
+
+
+def _get_git_commit(project_root):
     try:
         r = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                            text=True, cwd=project_root, timeout=10)
@@ -30,7 +58,7 @@ def _get_git_commit(project_root: str | Path) -> str:
     return "unknown"
 
 
-def _get_git_branch(project_root: str | Path) -> str:
+def _get_git_branch(project_root):
     try:
         r = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
                            capture_output=True, text=True, cwd=project_root, timeout=10)
@@ -41,7 +69,7 @@ def _get_git_branch(project_root: str | Path) -> str:
     return "unknown"
 
 
-def _get_git_dirty(project_root: str | Path) -> bool:
+def _get_git_dirty(project_root):
     try:
         r = subprocess.run(["git", "status", "--porcelain"],
                            capture_output=True, text=True, cwd=project_root, timeout=10)
@@ -52,7 +80,20 @@ def _get_git_dirty(project_root: str | Path) -> bool:
     return True
 
 
-def _get_system_info() -> dict[str, str]:
+def _get_pip_freeze():
+    try:
+        r = subprocess.run(
+            [sys.executable, "-m", "pip", "freeze", "--all"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if r.returncode == 0:
+            return [line for line in r.stdout.strip().split("\n") if line and not line.startswith("#")]
+    except Exception:
+        pass
+    return []
+
+
+def _get_system_info():
     return {
         "hostname": socket.gethostname(),
         "user": os.environ.get("USER", os.environ.get("LOGNAME", "unknown")),
@@ -63,8 +104,8 @@ def _get_system_info() -> dict[str, str]:
     }
 
 
-def _lookup_run_info(csv_path: str | Path, run_id: int) -> dict[str, Any]:
-    info: dict[str, Any] = {"run": run_id}
+def _lookup_run_info(csv_path, run_id):
+    info = {"run": run_id}
     try:
         with open(csv_path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -82,7 +123,7 @@ def _lookup_run_info(csv_path: str | Path, run_id: int) -> dict[str, Any]:
     return info
 
 
-def _compute_histogram(energy: np.ndarray, bins: int = 200, range_val: tuple = (0, 3)) -> dict:
+def _compute_histogram(energy, bins=200, range_val=(0, 3)):
     hist, edges = np.histogram(energy, bins=bins, range=range_val)
     return {
         "bin_edges_full": [float(f"{e:.4f}") for e in edges],
@@ -92,7 +133,7 @@ def _compute_histogram(energy: np.ndarray, bins: int = 200, range_val: tuple = (
     }
 
 
-def _get_package_versions() -> dict[str, str]:
+def _get_package_versions():
     versions = {}
     for mod_name in ["numpy", "scipy", "matplotlib", "iminuit", "pandas"]:
         try:
@@ -102,34 +143,70 @@ def _get_package_versions() -> dict[str, str]:
             versions[mod_name] = "not_installed"
     return versions
 
-class RunLogger:
-    """Collects and writes comprehensive run logs for the pipeline."""
 
-    def __init__(self, output_dir: str | Path, project_root: str | Path,
-                 launched_by: str = "script"):
+def _now_utc():
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+def _now_local():
+    return time.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+class RunLogger:
+    """Collects and writes comprehensive run logs.
+
+    Use as a context manager to ensure finalize() is called even on failure:
+
+        with RunLogger(output_dir, project_root) as logger:
+            logger.add_source_record(...)
+    """
+
+    def __init__(self, output_dir, project_root, launched_by="script"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.project_root = Path(project_root)
         self.launched_by = launched_by
+        self._finalized = False
+        self._console_lines = []
 
-        self.record: dict[str, Any] = {
+        run_id = f"{time.strftime('%Y%m%dT%H%M%S')}_{uuid.uuid4().hex[:8]}"
+
+        cfg_files = {
+            "paths_py": str(self.project_root / "config" / "paths.py"),
+            "calib_run_csv": str(self.project_root / "CalibRUN.csv"),
+            "requirements_txt": str(self.project_root / "requirements.txt"),
+        }
+        config_snapshot = {}
+        for label, path in cfg_files.items():
+            p = Path(path)
+            if p.exists():
+                config_snapshot[label] = {
+                    "path": str(p), "sha256": sha256_file(p), "size_bytes": p.stat().st_size
+                }
+            else:
+                config_snapshot[label] = {"path": str(p), "sha256": None, "size_bytes": 0}
+
+        self.record = {
+            "schema_version": SCHEMA_VERSION,
+            "run_id": run_id,
+            "status": "running",
             "pipeline_metadata": {
                 "launched_by": launched_by,
-                "timestamp_start": time.strftime("%Y-%m-%d %H:%M:%S %Z"),
-                "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+                "timestamp_start_utc": _now_utc(),
+                "timestamp_start_local": _now_local(),
                 "system": _get_system_info(),
                 "git": {
-                    "commit": _get_git_commit(project_root),
-                    "branch": _get_git_branch(project_root),
-                    "has_uncommitted_changes": _get_git_dirty(project_root),
+                    "commit": _get_git_commit(self.project_root),
+                    "branch": _get_git_branch(self.project_root),
+                    "has_uncommitted_changes": _get_git_dirty(self.project_root),
                 },
                 "packages": _get_package_versions(),
-                "config_files": {
-                    "paths_py": str(project_root / "config" / "paths.py"),
-                    "calib_run_csv": str(project_root / "CalibRUN.csv"),
-                },
+                "pip_freeze": _get_pip_freeze(),
+                "config_files": cfg_files,
+                "config_snapshot": config_snapshot,
             },
             "sources": [],
+            "errors": [],
             "summary": {},
             "agent_notes": None,
         }
@@ -141,42 +218,80 @@ class RunLogger:
                 "decisions": [], "exceptions": [],
             }
 
-    def set_agent_info(self, agent_name: str = "", agent_version: str = "",
-                       workflow_description: str = "") -> None:
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is not None:
+            self.record["status"] = "failed"
+            self.add_error("pipeline", str(exc_val), "pipeline encountered an unhandled exception")
+            import traceback
+            tb_path = self.output_dir / "traceback.log"
+            try:
+                with open(tb_path, "w") as f:
+                    traceback.print_exception(exc_type, exc_val, exc_tb, file=f)
+                print(f"[Log] Traceback saved to: {tb_path}", flush=True)
+            except Exception:
+                pass
+        self.finalize()
+
+    def set_agent_info(self, agent_name="", agent_version="", workflow_description=""):
         if self.record["agent_notes"] is None:
-            self.record["agent_notes"] = {}
+            self.record["agent_notes"] = {
+                "agent_name": "", "agent_version": "",
+                "workflow_description": "",
+                "decisions": [], "exceptions": [],
+            }
         self.record["agent_notes"]["agent_name"] = agent_name
         self.record["agent_notes"]["agent_version"] = agent_version
         self.record["agent_notes"]["workflow_description"] = workflow_description
 
-    def add_agent_decision(self, decision: str, reason: str) -> None:
+    def add_agent_decision(self, decision, reason):
         if self.record["agent_notes"] is not None:
             self.record["agent_notes"]["decisions"].append({
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "decision": decision, "reason": reason,
+                "timestamp_utc": _now_utc(), "decision": decision, "reason": reason,
             })
 
-    def add_agent_exception(self, source: str, exception: str, resolution: str) -> None:
+    def add_agent_exception(self, source, exception, resolution):
         if self.record["agent_notes"] is not None:
             self.record["agent_notes"]["exceptions"].append({
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "source": source, "exception": exception, "resolution": resolution,
+                "timestamp_utc": _now_utc(), "source": source,
+                "exception": exception, "resolution": resolution,
             })
+
+    def add_error(self, source, message, resolution=""):
+        self.record["errors"].append({
+            "timestamp_utc": _now_utc(), "source": source,
+            "message": message, "resolution": resolution,
+        })
+
+    def write_console(self, text):
+        self._console_lines.append(text)
+
+    def flush_console_log(self):
+        if not self._console_lines:
+            return
+        console_path = self.output_dir / "console.log"
+        try:
+            with open(console_path, "w", encoding="utf-8") as f:
+                f.write("\n".join(self._console_lines) + "\n")
+            print(f"[Log] Console log: {console_path}", flush=True)
+        except Exception as e:
+            print(f"[Log] Failed to write console log: {e}", flush=True)
 
     def add_source_record(self, *, src_name, run_id, e_true, fitter_type,
                           fitter_file, input_path, output_files,
                           event_data=None, fit_results=None,
                           fitter_params=None, elapsed_s=0.0,
-                          extra_notes=None) -> None:
+                          status="success", error_message=None, extra_notes=None):
         input_path = Path(input_path)
         run_info = _lookup_run_info(self.project_root / "CalibRUN.csv", run_id)
+        input_metadata = file_info(input_path)
+        input_metadata["format"] = input_path.suffix
 
-        input_metadata = {
-            "path": str(input_path.resolve()),
-            "exists": input_path.exists(),
-            "size_bytes": input_path.stat().st_size if input_path.exists() else 0,
-            "format": input_path.suffix,
-        }
+        mc_template_info = {}
+        if fitter_params and "template_path" in fitter_params:
+            mc_template_info = file_info(fitter_params["template_path"])
 
         event_stats = {}
         if event_data is not None:
@@ -199,60 +314,110 @@ class RunLogger:
                 if k in fit_results:
                     fit_record[k] = fit_results[k]
             if fit_results.get("chi2") is not None and fit_results.get("ndf") is not None:
-                fit_record["chi2_over_ndf"] = (
-                    f"{fit_results['chi2']:.1f}/{fit_results['ndf']}"
-                )
+                fit_record["chi2_over_ndf"] = f"{fit_results['chi2']:.1f}/{fit_results['ndf']}"
+
+        output_files_info = {}
+        for label, path in (output_files or {}).items():
+            output_files_info[label] = file_info(path)
+
+        params_clean = {}
+        if fitter_params:
+            for k, v in fitter_params.items():
+                if k != "template_path":
+                    params_clean[k] = v
 
         source_record = {
+            "status": status,
             "source": src_name, "run": run_id, "e_true_mev": e_true,
             "fitter_type": fitter_type,
             "run_info": run_info,
             "input_data": input_metadata,
+            "mc_template": mc_template_info,
             "event_statistics": event_stats,
             "code_version": {
                 "fitter_file": str(Path(fitter_file)),
                 "fitter_type": fitter_type,
                 "git_commit": _get_git_commit(self.project_root),
             },
-            "fitter_parameters": fitter_params or {},
+            "fitter_parameters": params_clean,
             "fit_results": fit_record,
-            "output_files": output_files,
+            "output_files": output_files_info,
             "timing_s": elapsed_s,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "timestamp_utc": _now_utc(),
         }
+        if error_message:
+            source_record["error_message"] = error_message
         if extra_notes:
             source_record["notes"] = extra_notes
         self.record["sources"].append(source_record)
 
-    def set_summary(self, summary: dict[str, Any]) -> None:
+    def save_config_snapshot(self, extra_configs=None):
+        snap = {}
+        for label, path in self.record["pipeline_metadata"]["config_files"].items():
+            p = Path(path)
+            if p.exists():
+                try:
+                    snap[label] = p.read_text(encoding="utf-8")
+                except Exception:
+                    snap[label] = f"# ERROR: could not read {p}"
+        if extra_configs:
+            for label, content in extra_configs.items():
+                snap[label] = content
+        snap_path = self.output_dir / "config_snapshot.json"
+        try:
+            with open(snap_path, "w", encoding="utf-8") as f:
+                json.dump(snap, f, indent=2, ensure_ascii=False)
+                f.write("\n")
+            print(f"[Log] Config snapshot: {snap_path}", flush=True)
+        except Exception as e:
+            print(f"[Log] Failed to write config snapshot: {e}", flush=True)
+
+    def set_summary(self, summary):
         self.record["summary"] = summary
 
-    def finalize(self) -> tuple[Path, Path]:
-        self.record["pipeline_metadata"]["timestamp_end"] = (
-            time.strftime("%Y-%m-%d %H:%M:%S %Z"))
+    def finalize(self):
+        if self._finalized:
+            return self.output_dir / "run_log.json", self.output_dir / "run_log.md"
+        self._finalized = True
+
+        if self.record["status"] == "running":
+            n_failed = sum(1 for s in self.record["sources"] if s.get("status") == "failed")
+            n_skipped = sum(1 for s in self.record["sources"] if s.get("status") == "skipped")
+            if n_failed > 0:
+                self.record["status"] = "partial_failure"
+            else:
+                self.record["status"] = "completed"
+
+        self.record["pipeline_metadata"]["timestamp_end_utc"] = _now_utc()
+        self.record["pipeline_metadata"]["timestamp_end_local"] = _now_local()
+
         json_path = self.output_dir / "run_log.json"
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(self.record, f, indent=2, ensure_ascii=False, default=str)
             f.write("\n")
+
         md_path = self.output_dir / "run_log.md"
         with open(md_path, "w", encoding="utf-8") as f:
             f.write(self._format_markdown())
-        print(f"[Log] JSON log: {json_path}")
-        print(f"[Log] MD log:  {md_path}")
+
+        self.flush_console_log()
+
+        print(f"[Log] JSON log: {json_path}", flush=True)
+        print(f"[Log] MD log:  {md_path}", flush=True)
         return json_path, md_path
 
-    def _format_markdown(self) -> str:
+    def _format_markdown(self):
         r = self.record
         lines = []
         m = r["pipeline_metadata"]
 
-        # -- Header --
-        lines.append("# Run Log — JUNO Calibration Fitter Pipeline\n")
+        lines.append(f"# Run Log — JUNO Calibration Fitter Pipeline (v{r.get('schema_version','?')})\n")
+        lines.append(f"**Run ID**: `{r.get('run_id', '?')}`")
+        lines.append(f"**Status**: `{r['status']}`")
         lines.append(f"**Launched by**: `{m['launched_by']}`")
-        lines.append(f"**Start time**: {m['timestamp_start']}")
-        lines.append(f"**End time**:   {m['timestamp_end']}\n")
+        lines.append(f"**Start (UTC)**: {m.get('timestamp_start_utc', '?')}")
+        lines.append(f"**End (UTC)**:   {m.get('timestamp_end_utc', '?')}\n")
 
-        # -- System --
         s = m["system"]
         lines.append("## System Information\n")
         lines.append("| Field | Value |\n|-------|-------|")
@@ -261,7 +426,6 @@ class RunLogger:
         lines.append(f"| Platform | `{s['platform']}` |")
         lines.append(f"| Python | `{s['python_version']}` |\n")
 
-        # -- Git --
         g = m["git"]
         lines.append("## Code Version\n")
         lines.append("| Field | Value |\n|-------|-------|")
@@ -269,75 +433,72 @@ class RunLogger:
         lines.append(f"| Git branch | `{g['branch']}` |")
         lines.append(f"| Uncommitted changes | `{g['has_uncommitted_changes']}` |\n")
         if g["has_uncommitted_changes"]:
-            lines.append("> ⚠️ Warning: Working tree has uncommitted changes.\n")
+            lines.append("> Warning: Working tree has uncommitted changes.\n")
 
-        # -- Packages --
         lines.append("## Package Versions\n")
         for name, ver in m["packages"].items():
             lines.append(f"- **{name}**: `{ver}`")
         lines.append("")
 
-        # -- Config --
         lines.append("## Configuration Files\n")
-        lines.append("| Config | Path |\n|-------|------|")
+        lines.append("| Config | Path | SHA-256 |\n|-------|------|--------|")
         for label, path in m["config_files"].items():
-            lines.append(f"| {label} | `{path}` |")
+            cs = m.get("config_snapshot", {}).get(label, {})
+            sha = (cs.get("sha256", "") or "")[:16] + "..."
+            lines.append(f"| {label} | `{path}` | `{sha}` |")
         lines.append("")
 
-        # -- Per-source --
         lines.append("---\n## Per-Source Records\n")
         for src in r["sources"]:
-            lines.append(f"### {src['source']} — RUN{src['run']}\n")
+            tag = {"success": "OK", "failed": "FAIL", "skipped": "SKIP"}.get(src.get("status", "?"), "?")
+            lines.append(f"### [{tag}] {src['source']} — RUN{src['run']}\n")
             ri = src["run_info"]
             lines.append("| Field | Value |\n|-------|-------|")
+            lines.append(f"| Status | {src.get('status', '?')} |")
             lines.append(f"| Source | {src['source']} |")
             lines.append(f"| Run | {src['run']} |")
             lines.append(f"| Date | {ri.get('date', '?')} |")
-            lines.append(f"| Position (X,Y,Z) | ({ri.get('x_m',0):.1f}, {ri.get('y_m',0):.1f}, {ri.get('z_m',0):.1f}) m |")
+            lines.append(f"| Position | ({ri.get('x_m',0):.1f}, {ri.get('y_m',0):.1f}, {ri.get('z_m',0):.1f}) m |")
             lines.append(f"| E_true | {src['e_true_mev']:.4f} MeV |")
-            lines.append(f"| Fitter type | `{src['fitter_type']}` |")
-            lines.append(f"| Fitter file | `{src['code_version']['fitter_file']}` |")
-            lines.append(f"| Git commit | `{src['code_version']['git_commit']}` |\n")
+            lines.append(f"| Fitter | `{src['fitter_type']}` |\n")
 
             inp = src["input_data"]
             lines.append("#### Input Data\n")
             lines.append("| Field | Value |\n|-------|-------|")
-            sz = inp.get("size_bytes", 0)
             lines.append(f"| File | `{inp['path']}` |")
-            lines.append(f"| Size | {sz:,} bytes ({sz/1024:.0f} KB) |")
-            lines.append(f"| Format | `{inp['format']}` |\n")
+            sz = inp.get("size_bytes", 0)
+            sha_inp = (inp.get("sha256") or "")[:16]
+            lines.append(f"| Size | {sz:,} bytes |")
+            lines.append(f"| SHA-256 | `{sha_inp}...` |\n")
 
             es = src.get("event_statistics", {})
             if es:
-                lines.append("#### Event Statistics\n")
+                lines.append("#### Events\n")
                 lines.append("| Field | Value |\n|-------|-------|")
-                lines.append(f"| Total events | {es.get('total_events', '?')} |")
-                lines.append(f"| Finite events | {es.get('finite_events', '?')} |")
-                lines.append(f"| Energy range | {es.get('energy_min','?'):.4f} – {es.get('energy_max','?'):.4f} MeV |")
-                lines.append(f"| Energy mean | {es.get('energy_mean','?'):.4f} MeV |")
-                lines.append(f"| Energy median | {es.get('energy_median','?'):.4f} MeV |\n")
+                lines.append(f"| Total | {es.get('total_events','?')} |")
+                lines.append(f"| Energy range | {es.get('energy_min','?'):.4f} - {es.get('energy_max','?'):.4f} MeV |\n")
 
             fr = src.get("fit_results", {})
             if fr:
                 lines.append("#### Fit Results\n")
                 lines.append("| Field | Value |\n|-------|-------|")
-                lines.append(f"| Mu (μ) | {fr.get('mu','?'):.4f} MeV |")
-                lines.append(f"| Sigma (σ) | {fr.get('sigma','?'):.4f} MeV |")
-                lines.append(f"| σ/E | {fr.get('sigma_over_e_pct','?'):.2f}% |")
-                lines.append(f"| χ²/ndf | {fr.get('chi2_over_ndf','?')} |")
-                lines.append(f"| Timing | {src.get('timing_s',0):.1f}s |\n")
+                lines.append(f"| Mu | {fr.get('mu','?'):.4f} MeV |")
+                lines.append(f"| Sigma/E | {fr.get('sigma_over_e_pct','?'):.2f}% |")
+                lines.append(f"| Chi2/ndf | {fr.get('chi2_over_ndf','?')} |")
+                lines.append(f"| Time | {src.get('timing_s',0):.1f}s |\n")
 
             of = src.get("output_files", {})
             if of:
                 lines.append("#### Output Files\n")
-                for label, path in of.items():
-                    lines.append(f"- **{label}**: `{path}`")
+                for label, info in of.items():
+                    sha_out = (info.get("sha256") or "")[:12]
+                    lines.append(f"- **{label}**: `{info['path']}` (SHA-256: `{sha_out}...`)")
                 lines.append("")
 
             if src.get("notes"):
                 lines.append(f"**Notes**: {src['notes']}\n")
 
-        # -- Summary --
+        # Summary
         sm = r.get("summary", {})
         if sm:
             lines.append("---\n## Summary\n")
@@ -346,7 +507,7 @@ class RunLogger:
                 lines.append(f"| {key} | {val} |")
             lines.append("")
 
-        # -- Agent notes --
+        # Agent notes
         an = r.get("agent_notes")
         if an:
             lines.append("---\n## Agent Notes\n")
@@ -355,9 +516,16 @@ class RunLogger:
                 lines.append(f"\n**Workflow**: {an['workflow_description']}")
             lines.append("")
             for d in an.get("decisions", []):
-                lines.append(f"- **Decision [{d['timestamp']}]**: {d['decision']} — {d['reason']}")
+                lines.append(f"- Decision [{d['timestamp_utc']}]: {d['decision']} — {d['reason']}")
             for e in an.get("exceptions", []):
-                lines.append(f"- **Exception [{e['timestamp']}]**: [{e['source']}] {e['exception']} → {e['resolution']}")
+                lines.append(f"- Exception [{e['timestamp_utc']}]: [{e['source']}] {e['exception']} -> {e['resolution']}")
+            lines.append("")
+
+        # Errors
+        if r.get("errors"):
+            lines.append("---\n## Errors\n")
+            for err in r["errors"]:
+                lines.append(f"- [{err['source']}] {err['message']} ({err['resolution']})")
             lines.append("")
 
         lines.append("---\n*End of run log*")
