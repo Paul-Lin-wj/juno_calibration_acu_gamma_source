@@ -20,14 +20,17 @@ Without a complete log, a result is **not reproducible** and **not citable**.
 
 ## Log Output Files
 
-Each pipeline run produces two log files in the output directory:
+Each pipeline run produces the following files in the output directory:
 
 | File | Format | Purpose |
 |------|--------|---------|
 | `run_log.json` | JSON | Structured, machine-readable. For programmatic analysis and comparison. |
 | `run_log.md` | Markdown | Human-readable formatted report. For quick visual inspection. |
+| `config_snapshot.json` | JSON | Full content of `config/paths.py`, `CalibRUN.csv`, `requirements.txt` at run time. |
+| `console.log` | Text | Captured console output (optional, enabled via `logger.write_console()`). |
+| `traceback.log` | Text | Full traceback if the pipeline fails (only on errors). |
 
-Both files are generated automatically by `pipeline/run_fit_all.py` via the `RunLogger` class in `src/run_logger.py`.
+All files are generated automatically by `pipeline/run_fit_all.py` via the `RunLogger` class in `src/run_logger.py`. The logger is a **context manager** — `finalize()` is guaranteed to run even if the pipeline fails partway through.
 
 ---
 
@@ -39,10 +42,27 @@ Every run log **must** contain the following sections:
 
 | Field | Description | Example |
 |-------|-------------|---------|
+| `schema_version` | Log format version | `"2.0"` |
+| `run_id` | Unique run identifier (timestamp + UUID) | `20260821T132751_8b263f0c` |
+| `status` | Run outcome | `"completed"`, `"partial_failure"`, `"failed"` |
 | `launched_by` | How the run was started | `"script"` or `"agent"` |
-| `timestamp_start` | Wall-clock start time | `2026-08-21 10:57:59 CST` |
-| `timestamp_end` | Wall-clock end time | `2026-08-21 10:58:08 CST` |
-| `timestamp_utc` | ISO 8601 UTC time | `2026-08-21T02:57:59+00:00` |
+| `timestamp_start_utc` | ISO 8601 UTC start time | `2026-08-21T05:27:51.123Z` |
+| `timestamp_end_utc` | ISO 8601 UTC end time | `2026-08-21T05:27:59.456Z` |
+
+### Content Fingerprints (SHA-256)
+
+Every file referenced by the log is fingerprinted with SHA-256:
+
+| What | Where |
+|------|-------|
+| Input NPZ data | `sources[].input_data.sha256` |
+| MC template NPZ | `sources[].mc_template.sha256` |
+| Output files | `sources[].output_files.*.sha256` |
+| `config/paths.py` | `pipeline_metadata.config_snapshot.paths_py.sha256` |
+| `CalibRUN.csv` | `pipeline_metadata.config_snapshot.calib_run_csv.sha256` |
+| `requirements.txt` | `pipeline_metadata.config_snapshot.requirements_txt.sha256` |
+
+This allows a third party to verify they are looking at **byte-identical** inputs and outputs.
 
 ### 2. System Information
 
@@ -67,6 +87,7 @@ Every run log **must** contain the following sections:
 ### 4. Package Versions
 
 All key Python package versions are recorded: `numpy`, `scipy`, `matplotlib`, `iminuit`, `pandas`.
+The full `pip freeze --all` output is also stored in `pipeline_metadata.pip_freeze`.
 
 ### 5. Per-Source Records
 
@@ -74,12 +95,14 @@ For each source in `SOURCES`, the log records:
 
 | Category | Fields |
 |----------|--------|
+| **Status** | `success`, `skipped`, or `failed` (+ `error_message` when failed) |
 | **Run info** | Source name, run number, date, position (X, Y, Z, R), E_true |
-| **Input data** | Full file path, file size, format |
+| **Input data** | Full file path, file size, **SHA-256 hash**, format |
+| **MC template** | Template NPZ path, size, SHA-256 |
 | **Event statistics** | Total events, finite events, energy range (min/max/mean/median), **pre-selection spectrum** (200-bin histogram) |
 | **Code version** | Fitter file path, fitter type, git commit |
 | **Fit results** | μ (MeV), σ (MeV), σ/E (%), χ², ndf, χ²/ndf, timing |
-| **Output files** | Paths to result NPZ, fit figures, summary plots |
+| **Output files** | Paths, sizes, SHA-256 hashes of result NPZ and fit figures |
 
 ### 6. Summary
 
@@ -101,13 +124,25 @@ Total sources configured, total sources fitted, total execution time, list of so
 
 When an **AI agent** drives the pipeline, the agent **must**:
 
-### 1. Identify itself
+### 1. Identify itself (CLI method)
+
+Use the command-line arguments when calling `pipeline/run_fit_all.py`:
+
+```bash
+python pipeline/run_fit_all.py \
+    --launched-by agent \
+    --agent-name "DeepSeek Agent" \
+    --agent-version "v4-flash" \
+    --agent-workflow "Full pipeline run with 5 sources at CD center"
+```
+
+Or programmatically via the logger API:
 
 ```python
 logger.set_agent_info(
     agent_name="DeepSeek Agent",
     agent_version="v4-flash",
-    workflow_description="User requested full pipeline run with all 5 sources at CD center",
+    workflow_description="Full pipeline run with all 5 sources at CD center",
 )
 ```
 

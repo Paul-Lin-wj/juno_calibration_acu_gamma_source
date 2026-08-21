@@ -1,10 +1,10 @@
 # Run Log — JUNO Calibration Fitter Pipeline (v2.0)
 
-**Run ID**: `20260821T133224_d3fdc7c4`
+**Run ID**: `20260821T134344_bb96a91b`
 **Status**: `completed`
 **Launched by**: `script`
-**Start (UTC)**: 2026-08-21T05:32:24.336176Z
-**End (UTC)**:   2026-08-21T05:32:32.767730Z
+**Start (UTC)**: 2026-08-21T05:43:44.581136Z
+**End (UTC)**:   2026-08-21T05:43:52.351669Z
 
 ## System Information
 
@@ -19,7 +19,7 @@
 
 | Field | Value |
 |-------|-------|
-| Git commit | `e61e274fb878d2dbb2b2b158643575fd38a1030a` |
+| Git commit | `906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4` |
 | Git branch | `main` |
 | Uncommitted changes | `True` |
 
@@ -78,12 +78,12 @@
 | Mu | 0.9102 MeV |
 | Sigma/E | 3.54% |
 | Chi2/ndf | 600.2/358 |
-| Time | 4.6s |
+| Time | 4.5s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12370_Ge68.npz` (SHA-256: `0247b0f4584e...`)
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12370_Ge68.pdf` (SHA-256: `49608ae4a359...`)
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12370_Ge68.npz` (SHA-256: `0247b0f4584e...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12370_Ge68.pdf` (SHA-256: `8a2c01ccb69f...`)
 
 ### [OK] Cs137 — RUN12295
 
@@ -123,8 +123,8 @@
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12295_Cs137.npz` (SHA-256: `edea029c1b4f...`)
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12295_Cs137.pdf` (SHA-256: `3a083310f85b...`)
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12295_Cs137.npz` (SHA-256: `edea029c1b4f...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12295_Cs137.pdf` (SHA-256: `f7711f1afc82...`)
 
 ### [OK] Mn54 — RUN12247
 
@@ -160,12 +160,12 @@
 | Mu | 0.7780 MeV |
 | Sigma/E | 3.92% |
 | Chi2/ndf | 148.6/111 |
-| Time | 0.6s |
+| Time | 0.5s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12247_Mn54.npz` (SHA-256: `d2059fed24e8...`)
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12247_Mn54.pdf` (SHA-256: `76f8fca9f5e5...`)
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12247_Mn54.npz` (SHA-256: `d2059fed24e8...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12247_Mn54.pdf` (SHA-256: `68462b77862b...`)
 
 ### [OK] Co60 — RUN12216
 
@@ -205,8 +205,8 @@
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12216_Co60.npz` (SHA-256: `48b340520a55...`)
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12216_Co60.pdf` (SHA-256: `11b75e1efb1b...`)
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12216_Co60.npz` (SHA-256: `48b340520a55...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12216_Co60.pdf` (SHA-256: `157279a15bfe...`)
 
 ### [OK] K40 — RUN9632
 
@@ -242,12 +242,12 @@
 | Mu | 1.4158 MeV |
 | Sigma/E | 2.98% |
 | Chi2/ndf | 154.4/145 |
-| Time | 0.5s |
+| Time | 0.4s |
 
 #### Output Files
 
-- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN9632_K40.npz` (SHA-256: `41ccea147e2e...`)
-- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN9632_K40.pdf` (SHA-256: `a6fb87b19326...`)
+- **result_npz**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN9632_K40.npz` (SHA-256: `41ccea147e2e...`)
+- **figure**: `/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN9632_K40.pdf` (SHA-256: `70cceb7e8ef5...`)
 
 ---
 ## Summary
@@ -256,9 +256,9 @@
 |-------|-------|
 | total_sources_configured | 5 |
 | total_sources_fitted | 5 |
-| total_time_s | 8.2 |
+| total_time_s | 7.5 |
 | sources | Ge68, Cs137, Mn54, Co60, K40 |
-| output_directory | /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224 |
+| output_directory | /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344 |
 
 ---
 *End of run log*

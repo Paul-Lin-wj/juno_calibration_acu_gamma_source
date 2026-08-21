@@ -1,21 +1,21 @@
 {
   "schema_version": "2.0",
-  "run_id": "20260821T133224_d3fdc7c4",
+  "run_id": "20260821T134344_bb96a91b",
   "status": "completed",
   "pipeline_metadata": {
     "launched_by": "script",
-    "timestamp_start_utc": "2026-08-21T05:32:24.336176Z",
-    "timestamp_start_local": "2026-08-21 13:32:24 CST",
+    "timestamp_start_utc": "2026-08-21T05:43:44.581136Z",
+    "timestamp_start_local": "2026-08-21 13:43:44 CST",
     "system": {
       "hostname": "user-Super-Server",
       "user": "lin",
       "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
       "python_version": "3.12.3",
       "python_executable": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/.venv/bin/python",
-      "timestamp_utc": "2026-08-21T05:32:24.338392+00:00"
+      "timestamp_utc": "2026-08-21T05:43:44.582806+00:00"
     },
     "git": {
-      "commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a",
+      "commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4",
       "branch": "main",
       "has_uncommitted_changes": true
     },
@@ -65,8 +65,8 @@
         "size_bytes": 75
       }
     },
-    "timestamp_end_utc": "2026-08-21T05:32:32.767730Z",
-    "timestamp_end_local": "2026-08-21 13:32:32 CST"
+    "timestamp_end_utc": "2026-08-21T05:43:52.351669Z",
+    "timestamp_end_local": "2026-08-21 13:43:52 CST"
   },
   "sources": [
     {
@@ -515,7 +515,7 @@
       "code_version": {
         "fitter_file": "src/FastGe68Fitter.py",
         "fitter_type": "fast",
-        "git_commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a"
+        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
       },
       "fitter_parameters": {},
       "fit_results": {
@@ -528,20 +528,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12370_Ge68.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12370_Ge68.npz",
           "exists": true,
           "size_bytes": 45991,
           "sha256": "0247b0f4584e2578dc3e19fbf372f8ba986a79db1e5390c620936d6ddf2709ba"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12370_Ge68.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12370_Ge68.pdf",
           "exists": true,
           "size_bytes": 67863,
-          "sha256": "49608ae4a35921cd5c3c8a890a26fde76533dae12842bc289bd137a4b598dfda"
+          "sha256": "8a2c01ccb69f4864a87b15df5acf2291fd7d26d2353b9d6793c7054a88933a00"
         }
       },
-      "timing_s": 4.630429029464722,
-      "timestamp_utc": "2026-08-21T05:32:29.390088Z"
+      "timing_s": 4.470526933670044,
+      "timestamp_utc": "2026-08-21T05:43:49.416759Z"
     },
     {
       "status": "success",
@@ -989,7 +989,7 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a"
+        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
       },
       "fitter_parameters": {},
       "fit_results": {
@@ -1002,20 +1002,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12295_Cs137.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12295_Cs137.npz",
           "exists": true,
           "size_bytes": 13340,
           "sha256": "edea029c1b4f8bb6b3ad02cd2e8638f850fdeb2d6677d73c380086ed639262c5"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12295_Cs137.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12295_Cs137.pdf",
           "exists": true,
           "size_bytes": 36452,
-          "sha256": "3a083310f85bc402344dc6b56a8205c62db0b5c7cbd8cc0e4a5905500e56f8c0"
+          "sha256": "f7711f1afc82d25a0d758ce748817af89fcc7bf973e919737098d71ec261a447"
         }
       },
-      "timing_s": 0.6211330890655518,
-      "timestamp_utc": "2026-08-21T05:32:30.162770Z"
+      "timing_s": 0.5728812217712402,
+      "timestamp_utc": "2026-08-21T05:43:50.068566Z"
     },
     {
       "status": "success",
@@ -1463,7 +1463,7 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a"
+        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
       },
       "fitter_parameters": {},
       "fit_results": {
@@ -1476,20 +1476,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12247_Mn54.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12247_Mn54.npz",
           "exists": true,
           "size_bytes": 12092,
           "sha256": "d2059fed24e8c0fd84cc4afb25d4b139537ae6075c6e8eaa8c84e3e3baaace51"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12247_Mn54.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12247_Mn54.pdf",
           "exists": true,
           "size_bytes": 36646,
-          "sha256": "76f8fca9f5e5e5445a38dbac5f394bdd27f8acec969f6ae35679d0b856c6fd21"
+          "sha256": "68462b77862b1d19c8978b1fa342491e8b880a3d3b19d0aa997d80a8750ec814"
         }
       },
-      "timing_s": 0.570258378982544,
-      "timestamp_utc": "2026-08-21T05:32:30.870124Z"
+      "timing_s": 0.5120179653167725,
+      "timestamp_utc": "2026-08-21T05:43:50.619801Z"
     },
     {
       "status": "success",
@@ -1937,7 +1937,7 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a"
+        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
       },
       "fitter_parameters": {},
       "fit_results": {
@@ -1950,20 +1950,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN12216_Co60.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12216_Co60.npz",
           "exists": true,
           "size_bytes": 15740,
           "sha256": "48b340520a554b3479706a9ca575cb6fd734209f2aec37c1c5e12ce7d276799d"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN12216_Co60.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12216_Co60.pdf",
           "exists": true,
           "size_bytes": 38538,
-          "sha256": "11b75e1efb1b6faf34b80cfceb08f2bd42215c086430ba494defcbbb47025384"
+          "sha256": "157279a15bfeb1856de9cd40e42289885cedf7eb588397dc3f24f0d3311c3415"
         }
       },
-      "timing_s": 0.64729905128479,
-      "timestamp_utc": "2026-08-21T05:32:31.644449Z"
+      "timing_s": 0.6014206409454346,
+      "timestamp_utc": "2026-08-21T05:43:51.286675Z"
     },
     {
       "status": "success",
@@ -2411,7 +2411,7 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "e61e274fb878d2dbb2b2b158643575fd38a1030a"
+        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
       },
       "fitter_parameters": {},
       "fit_results": {
@@ -2424,29 +2424,29 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/results/RUN9632_K40.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN9632_K40.npz",
           "exists": true,
           "size_bytes": 15692,
           "sha256": "41ccea147e2e7da1907ac7537be4f8ce100cc4b49c953ef01326fad7a2753431"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224/figures/RUN9632_K40.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN9632_K40.pdf",
           "exists": true,
           "size_bytes": 37440,
-          "sha256": "a6fb87b1932616a6d5adf601e0b52ac9177ba79b0fb448bdc4d79bcc206bd435"
+          "sha256": "70cceb7e8ef58dcf3ab6980e5a1733efc4754501b62687dea6e5bd5fd8ab7986"
         }
       },
-      "timing_s": 0.4795961380004883,
-      "timestamp_utc": "2026-08-21T05:32:32.159666Z"
+      "timing_s": 0.44423389434814453,
+      "timestamp_utc": "2026-08-21T05:43:51.759733Z"
     }
   ],
   "errors": [],
   "summary": {
     "total_sources_configured": 5,
     "total_sources_fitted": 5,
-    "total_time_s": "8.2",
+    "total_time_s": "7.5",
     "sources": "Ge68, Cs137, Mn54, Co60, K40",
-    "output_directory": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_133224"
+    "output_directory": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344"
   },
   "agent_notes": null
 }
