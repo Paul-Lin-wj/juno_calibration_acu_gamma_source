@@ -45,6 +45,9 @@ from config.paths import (
     MARKERS,
 )
 
+from src.run_logger import RunLogger
+from input_loader import normalize_event_input
+
 # ================= Timestamp-based output directory =================
 _timestamp = time.strftime("%Y%m%d_%H%M%S")
 OUTPUT_DIR = PROJECT_ROOT / "output" / _timestamp
@@ -55,6 +58,13 @@ OUTPUT_FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 print(f"[Info] Output directory: {OUTPUT_DIR}")
 sys.stdout.flush()
+
+# ================= Initialize run logger =================
+logger = RunLogger(
+    output_dir=OUTPUT_DIR,
+    project_root=PROJECT_ROOT,
+    launched_by="script",
+)
 
 # ================= Run fits =================
 results: dict[str, dict] = {}
@@ -70,6 +80,13 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
     print(f"[{src_name}] RUN{run_id} (E_true={e_true} MeV)")
     print(f"[{src_name}] Input: {input_path}")
     sys.stdout.flush()
+
+    # Load event data for logging (before fit)
+    event_data = None
+    try:
+        event_data = normalize_event_input(input_path, src_name)
+    except Exception as e:
+        print(f"[Warning] Could not load event data for logging: {e}")
 
     t0 = time.time()
     output_stem = f"RUN{run_id}_{src_name}"
@@ -87,6 +104,7 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
             c14_convolver="fft",
             results_only=False,
         )
+        fitter_file = "src/FastGe68Fitter.py"
     elif fitter_type == "fast" and src_name != "Ge68":
         from src.FastSourceFitter import run_fast_source_fitter
 
@@ -101,6 +119,7 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
             c14_convolver="fft",
             results_only=False,
         )
+        fitter_file = "src/FastSourceFitter.py"
     else:
         from src.MCBased_Fitter import run_fitter as run_classic_fitter
 
@@ -113,6 +132,7 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
             output_stem=output_stem,
             enable_c14=True,
         )
+        fitter_file = "src/MCBased_Fitter.py"
 
     elapsed = time.time() - t0
 
@@ -137,6 +157,39 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
         "e_true": e_true,
         "elapsed_s": elapsed,
     }
+
+    # Collect output file paths
+    output_files = {
+        "result_npz": str(npz_path),
+    }
+    if "figure" in outputs:
+        output_files["figure"] = outputs["figure"]
+    if "log_figure" in outputs:
+        output_files["figure_log"] = outputs["log_figure"]
+    if "full_figure" in outputs:
+        output_files["figure"] = outputs["full_figure"]
+    if "zoom_figure" in outputs:
+        output_files["figure_zoom"] = outputs["zoom_figure"]
+
+    # Log this source
+    logger.add_source_record(
+        src_name=src_name,
+        run_id=run_id,
+        e_true=e_true,
+        fitter_type=fitter_type,
+        fitter_file=fitter_file,
+        input_path=input_path,
+        output_files=output_files,
+        event_data=event_data,
+        fit_results={
+            "mu": mu,
+            "sigma": sigma,
+            "sigma_over_e_pct": sigma_over_e,
+            "chi2": chi2,
+            "ndf": ndf,
+        },
+        elapsed_s=elapsed,
+    )
 
     print(f"[{src_name}] mu={mu:.4f}, sigma/E={sigma_over_e:.2f}%, "
           f"chi2/ndf={chi2:.0f}/{ndf}, time={elapsed:.1f}s")
@@ -215,6 +268,20 @@ plt.close()
 
 print(f"Saved {png_path}")
 print(f"Saved {pdf_path}")
+
+# ===== Finalize log =====
+total_time = time.time() - total_start
+logger.set_summary({
+    "total_sources_configured": len(SOURCES),
+    "total_sources_fitted": len(results),
+    "total_time_s": f"{total_time:.1f}",
+    "total_time_min": f"{total_time/60:.1f}",
+    "sources": ", ".join(results.keys()),
+    "output_directory": str(OUTPUT_DIR),
+})
+json_path, md_path = logger.finalize()
+
 print(f"\n{'='*60}")
 print(f"Pipeline complete. Output directory: {OUTPUT_DIR}")
+print(f"Log files: {json_path.name}, {md_path.name}")
 print(f"To view results: open {png_path}")

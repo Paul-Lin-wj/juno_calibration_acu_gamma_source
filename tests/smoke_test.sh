@@ -130,16 +130,52 @@ print(f'{len(SOURCES)} source(s) configured: {[x[0] for x in SOURCES]}')
 
 check "CalibRUN.csv is readable" test -f "${PROJ_DIR}/CalibRUN.csv"
 
-# ---- 5. Pipeline dry-run ----
+# ---- 5. Logger module check ----
 echo ""
-echo "[5/5] Pipeline dry-run (import only)"
+echo "[5/6] Logger module check"
 
 check "pipeline/run_fit_all.py imports" "${VENV_DIR}/bin/python" -c "
 import sys; sys.path.insert(0, '${PROJ_DIR}')
 import matplotlib; matplotlib.use('Agg')
-# Just verify imports, don't execute the full pipeline
 from config.paths import PROJECT_ROOT, DATA_INPUT_PATH, SOURCES, A_JUNO_REF, B_JUNO_REF, COLORS, MARKERS
-print('Pipeline imports OK')
+from src.run_logger import RunLogger
+print('Pipeline + logger imports OK')
+"
+
+# ---- 6. Logger module check ----
+echo ""
+echo "[6/6] Pipeline dry-run (import only)"
+
+check "run_logger can be instantiated" "${VENV_DIR}/bin/python" -c "
+import sys, tempfile
+from pathlib import Path
+sys.path.insert(0, '${PROJ_DIR}')
+sys.path.insert(0, '${PROJ_DIR}/src')
+from src.run_logger import RunLogger
+with tempfile.TemporaryDirectory() as td:
+    logger = RunLogger(td, Path('${PROJ_DIR}'), launched_by='test')
+    logger.set_summary({'test': 'ok'})
+    j, m = logger.finalize()
+    print(f'JSON: {j.exists()}, MD: {m.exists()}')
+"
+
+check "logger agent_notes works" "${VENV_DIR}/bin/python" -c "
+import sys, tempfile, json
+from pathlib import Path
+sys.path.insert(0, '${PROJ_DIR}')
+sys.path.insert(0, '${PROJ_DIR}/src')
+from src.run_logger import RunLogger
+with tempfile.TemporaryDirectory() as td:
+    logger = RunLogger(td, Path('${PROJ_DIR}'), launched_by='agent')
+    logger.set_agent_info('TestAgent', '1.0', 'Testing')
+    logger.add_agent_decision('Test decision', 'Testing reason')
+    logger.add_agent_exception('Test', 'Test error', 'Test resolution')
+    j, m = logger.finalize()
+    print(f'Agent log: {j.exists()}, {m.exists()}')
+    d = json.load(open(j))
+    assert len(d['agent_notes']['decisions']) == 1
+    assert len(d['agent_notes']['exceptions']) == 1
+    print('Agent notes OK')
 "
 
 # ---- Summary ----
