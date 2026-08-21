@@ -142,9 +142,9 @@ Default JUNO values: `a = 3.309`, `b = 1.28`, `c = 0.0`
 
 ---
 
-## FastGe68Fitter Caching Strategy
+## FastGe68Fitter & FastSourceFitter Caching Strategy
 
-The key optimization in `FastGe68Fitter`:
+The key optimization in both `FastGe68Fitter` (Ge68) and `FastSourceFitter` (Cs137, Mn54, Co60, K40):
 
 ```
 INIT (once):
@@ -192,3 +192,46 @@ Ideally μ ≈ E_true. Differences indicate:
 - Energy non-linearity (physical)
 - Residual calibration offset (systematic)
 - Poor fit convergence (algorithmic; check χ²)
+
+---
+
+## FastSourceFitter (Generic Fast Fitter)
+
+`src/FastSourceFitter.py` implements a generic fast fitter for Cs137, Mn54, Co60, and K40.
+
+### Configuration
+
+The per-source parameters are defined in `SOURCE_CONFIG`:
+
+```python
+SOURCE_CONFIG = {
+    "Cs137": { "bkg_npz": "Cs137_Compton_BKG.npz", "mc_center": 0.58423,
+               "x_limit": 0.3, "bins_fit": np.arange(0.3, 0.9, 0.004) },
+    "Mn54":  { "bkg_npz": "Mn54_Compton_BKG.npz",  "mc_center": 0.75067,
+               "x_limit": 0.3, "bins_fit": np.arange(0.5, 1.0, 0.004) },
+    "Co60":  { "bkg_npz": "Co60_Compton_BKG.npz",  "mc_center": 2.30545,
+               "x_limit": 1.0, "bins_fit": np.arange(1.9, 2.7, 0.004) },
+    "K40":   { "bkg_npz": "K40_Compton_BKG.npz",   "mc_center": 1.35506,
+               "x_limit": 0.6, "bins_fit": np.arange(1.0, 1.8, 0.004) },
+}
+```
+
+### Model Structure
+
+All four sources have the same model:
+- 1 Compton background template (histogrammed + smeared once, cached)
+- 1 Gaussian Full-Energy Peak
+- C14 pileup (single + double, computed on each iteration)
+
+This is simpler than Ge68's model (which has 3 backgrounds + 1 extra high-energy peak).
+
+### Performance
+
+| Source | Fast | Classic | Speedup |
+|--------|:----:|:-------:|:-------:|
+| Cs137 | 0.22s | 12.5s | **56x** |
+| Mn54 | 0.17s | 7.5s | **45x** |
+| Co60 | 0.32s | 26.6s | **84x** |
+| K40 | 0.16s | 16.5s | **103x** |
+
+All 4 sources run in **~0.9 seconds total** (vs ~63s for classic).

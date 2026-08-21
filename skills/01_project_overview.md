@@ -39,9 +39,10 @@ input data (NPZ)  →  source-specific fitter  →  χ² minimization (iminuit) 
 
 ### Key Design Decisions
 
-- **Two fitter implementations**:
-  - `FastGe68Fitter` — caches MC template convolutions, ~5s per run (Ge68 only)
-  - Classic fitters — per-source implementations, ~15-90s per run (all sources)
+- **Two fitter families**:
+  - `FastGe68Fitter` — Ge68-specific, caches MC template convolutions, ~4-6s per run
+  - `FastSourceFitter` — Generic fast fitter for Cs137/Mn54/Co60/K40, ~0.2-0.7s per run
+  - Classic fitters — Per-source implementations in `fitters/`, retained as fallback (~7-27s per run)
 - **Pure Python**: No ROOT, cppyy, or C++ extensions required
 - **smx_ana fallback**: The `smx_ana` package is included as pure Python (no compiled `.so` needed)
 - **Timestamp outputs**: Each run creates `output/YYYYMMDD_HHMMSS/` — never overwrites previous results
@@ -67,8 +68,9 @@ input data (NPZ)  →  source-specific fitter  →  χ² minimization (iminuit) 
 standalone_fitter/
 ├── config/paths.py              # ★ Central path configuration (edit this first)
 ├── src/
-│   ├── FastGe68Fitter.py        # Cached-template Ge68 fitter (~5s/run)
-│   └── MCBased_Fitter.py        # Classic fitter entry point (~15-90s/run)
+│   ├── FastGe68Fitter.py        # Cached-template Ge68 fitter (~4-6s/run)
+│   ├── FastSourceFitter.py      # Generic fast fitter for Cs137/Mn54/Co60/K40 (~0.2-0.7s/run)
+│   └── MCBased_Fitter.py        # Classic fitter entry point (fallback, ~7-27s/run)
 ├── fitters/                     # Per-source fitter implementations + MC templates
 ├── smx_ana/                     # Pure-Python smx_ana replacement
 ├── pipeline/run_fit_all.py      # Main orchestration script

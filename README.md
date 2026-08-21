@@ -12,8 +12,12 @@ standalone_fitter/
 │
 ├── src/
 │   ├── FastGe68Fitter.py      # 缓存优化的 Fast 版 Ge68 拟合器
-│   ├── MCBased_Fitter.py      # 经典版拟合入口（Cs137 / Mn54 / Co60 / K40）
+│   ├── FastSourceFitter.py    # 通用 Fast 版拟合器（Cs137 / Mn54 / Co60 / K40）
+│   ├── MCBased_Fitter.py      # 经典版拟合入口（回退选择）
 │   ├── input_loader.py         # 输入数据加载 (.npz / .csv)
+│   ├── plot_style.py           # 绘图样式配置
+│   ├── plot_fit_summary.py     # 汇总趋势图工具
+│   └── convert_root_to_npz.py  # ROOT → NPZ 转换
 │   ├── plot_style.py           # 绘图样式配置
 │   ├── plot_fit_summary.py     # 汇总趋势图工具
 │   └── convert_root_to_npz.py  # ROOT → NPZ 转换
@@ -39,7 +43,8 @@ standalone_fitter/
 │
 ├── pipeline/
 │   ├── __init__.py
-│   └── run_fit_all.py         # ★ 主流程：跑所有源 → 收集结果 → 画 ENL 风格图
+│   ├── run_fit_all.py         # ★ 主流程：跑所有源 → 收集结果 → 画 ENL 风格图
+│   └── compare_fast_vs_classic.py  # Fast 版与经典版对比测试
 │
 ├── setup_env.sh               # 创建 Python 虚拟环境并安装依赖
 ├── run_pipeline.sh             # 一键运行
@@ -106,15 +111,17 @@ output/{YYYYMMDD_HHMMSS}/
 ```python
 SOURCES = [
     ("Ge68",  9541, 0.8845, "fast"),     # 用 Fast 版拟合
-    ("Cs137", 9600, 0.662,  "classic"),  # 用经典版拟合
-    ("Mn54",  9624, 0.835,  "classic"),
-    ("Co60",  9591, 2.506,  "classic"),
-    ("K40",   9632, 1.461,  "classic"),
+    ("Cs137", 9600, 0.662,  "fast"),     # 用 Fast 版拟合
+    ("Mn54",  9624, 0.835,  "fast"),
+    ("Co60",  9591, 2.506,  "fast"),
+    ("K40",   9632, 1.461,  "fast"),
 ]
 # 格式: (源名, Run号, 真能量(MeV), 拟合器类型)
 ```
 
-`fitter_type` 支持 `"fast"`（仅 Ge68 可用）和 `"classic"`（所有源可用）。
+`fitter_type` 支持：
+- `"fast"` — **推荐**，使用缓存优化的 Fast 版拟合器，所有源都可用
+- `"classic"` — 使用经典版拟合器，保留作为回退选择
 
 ### 修改 Run→源映射
 
@@ -126,19 +133,31 @@ RUN,Date,X[m],Y[m],Z[m],Source,R[m]
 
 ## 拟合器说明
 
-### FastGe68Fitter（缓存优化版）
+### FastFitter 系列（缓存优化版，推荐）
 
-- 初始化时一次性缓存 MC 模板的卷积结果
-- Minuit 迭代时无需重新 histogram / convolve
-- C14 pileup 使用 FFT 卷积加速
-- **单 run 约 4-6 秒**（经典版需 5-15 分钟）
+所有源都支持 Fast 版，实现模板缓存优化：
 
-### 经典版（MCBased_Fitter）
+| 源 | Fast 版 | 实现文件 | 单 run 耗时 |
+|----|---------|---------|:-----------:|
+| Ge68 | ✅ | `src/FastGe68Fitter.py` | **~4-6 秒** |
+| Cs137 | ✅ | `src/FastSourceFitter.py` | **~0.2-0.6 秒** |
+| Mn54 | ✅ | `src/FastSourceFitter.py` | **~0.2-0.5 秒** |
+| Co60 | ✅ | `src/FastSourceFitter.py` | **~0.3-0.7 秒** |
+| K40 | ✅ | `src/FastSourceFitter.py` | **~0.2-0.4 秒** |
+
+**核心原理**：初始化时一次性缓存 MC 模板的 histogram 和卷积结果，Minuit 迭代时无需重复计算。C14 pileup 使用 FFT 加速。
+
+**加速效果**：
+- Ge68: ~50-100x（vs 经典版 5-15 分钟）
+- Cs137/Mn54/Co60/K40: ~45-100x（vs 经典版 7-27 秒）
+
+### 经典版（MCBased_Fitter，回退选择）
+
+`fitters/` 目录下的 `Cs137Fitter.py`、`Co60Fitter.py`、`Mn54Fitter.py`、`K40Fitter.py` 保留作为回退。
 
 - 每次 Minuit 迭代重新 histogram + convolve
-- 各源各有独立的 Fitter（Cs137Fitter / Co60Fitter / ...）
-- C14 pileup 使用 Python 插值积分
-- **单 run 约 15-90 秒**（取决于源类型和数据量）
+- 使用方式：将 `config/paths.py` 中 `fitter_type` 改为 `"classic"`
+- 用于交叉验证或排查 Fast 版的潜在问题
 
 ## 关键技术参数
 
@@ -168,6 +187,5 @@ RUN,Date,X[m],Y[m],Z[m],Source,R[m]
 
 ## 遗留问题
 
-- `FastGe68Fitter` 目前只支持 Ge68，其他源暂无 Fast 版
-- Co60 拟合最慢（~80-90 秒/run），因其 pileup 计算更复杂
 - 数据需经过 Finalcorrection 修正（含绝对能标），否则峰位会有系统性偏移
+- `FastGe68Fitter` 和 `FastSourceFitter` 只支持 C14 pileup 启用模式（enable_c14=True），如需禁用 C14 请使用经典版

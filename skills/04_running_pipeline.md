@@ -33,12 +33,12 @@ For each entry in `config/paths.py` → `SOURCES`:
 | Source | Fitter | Typical Time |
 |--------|--------|:------------:|
 | Ge68 | `FastGe68Fitter` (cached) | **~4-6 seconds** |
-| Cs137 | `MCBased_Fitter` → `Cs137Fitter` | **~15-20 seconds** |
-| Mn54 | `MCBased_Fitter` → `Mn54Fitter` | **~10-15 seconds** |
-| Co60 | `MCBased_Fitter` → `Co60Fitter` | **~80-90 seconds** |
-| K40 | `MCBased_Fitter` → `K40Fitter` | **~25-30 seconds** |
+| Cs137 | `FastSourceFitter` (cached) | **~0.3-0.6 seconds** |
+| Mn54 | `FastSourceFitter` (cached) | **~0.2-0.5 seconds** |
+| Co60 | `FastSourceFitter` (cached) | **~0.3-0.7 seconds** |
+| K40 | `FastSourceFitter` (cached) | **~0.2-0.4 seconds** |
 
-Total: **~2-3 minutes** for all 5 sources.
+Total: **~6 seconds** for all 5 sources.
 
 ### Step 2: Collect Results
 
@@ -179,8 +179,10 @@ Measured on: Intel Xeon Platinum 8358P (128 logical cores / 1TB RAM)
 |--------|:-----------:|:----------:|:-----------------:|:------------------:|
 | Ge68 | Fast | **4-6 s** | ~3 min | ~6-10 s (41 cores) |
 | Ge68 | Classic | ~5-15 min | ~3-5 hours | ~20-25 min (41 cores) |
-| Cs137 | Classic | ~15-20 s | ~10-15 min | ~1 min (5 cores) |
-| Co60 | Classic | ~80-90 s | ~1 hour | ~2 min (5 cores) |
+| Cs137 | Fast | **~0.3 s** | **~12 s** | **~0.3 s** (41 cores) |
+| Cs137 | Classic | ~7-15 s | ~5-10 min | ~10-20 s (41 cores) |
+| Co60 | Fast | **~0.5 s** | **~20 s** | **~0.5 s** (41 cores) |
+| Co60 | Classic | ~15-27 s | ~10-18 min | ~30-60 s (41 cores) |
 
 ---
 

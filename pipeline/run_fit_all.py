@@ -74,10 +74,24 @@ for src_name, run_id, e_true, fitter_type in SOURCES:
     t0 = time.time()
     output_stem = f"RUN{run_id}_{src_name}"
 
-    if fitter_type == "fast":
+    if fitter_type == "fast" and src_name == "Ge68":
         from src.FastGe68Fitter import run_fast_ge68_fitter
 
         outputs = run_fast_ge68_fitter(
+            run_id=run_id,
+            input_path=input_path,
+            output_fig_dir=str(OUTPUT_FIG_DIR),
+            output_res_dir=str(OUTPUT_RES_DIR),
+            output_stem=output_stem,
+            enable_c14=True,
+            c14_convolver="fft",
+            results_only=False,
+        )
+    elif fitter_type == "fast" and src_name != "Ge68":
+        from src.FastSourceFitter import run_fast_source_fitter
+
+        outputs = run_fast_source_fitter(
+            source=src_name,
             run_id=run_id,
             input_path=input_path,
             output_fig_dir=str(OUTPUT_FIG_DIR),
