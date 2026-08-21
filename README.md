@@ -46,9 +46,11 @@ standalone_fitter/
 │   ├── run_fit_all.py         # ★ 主流程：跑所有源 → 收集结果 → 画 ENL 风格图
 │   └── compare_fast_vs_classic.py  # Fast 版与经典版对比测试
 │
-├── setup_env.sh               # 创建 Python 虚拟环境并安装依赖
-├── run_pipeline.sh             # 一键运行
-├── CalibRUN.csv                # Run → 源类型 / 位置 映射表
+├── tests/
+│   └── smoke_test.sh            # 环境验证脚本（15 项检查）
+├── setup_env.sh                 # 创建 Python 虚拟环境并安装依赖
+├── run_pipeline.sh              # 一键运行
+├── CalibRUN.csv                 # Run → 源类型 / 位置 映射表
 └── .gitignore
 ```
 

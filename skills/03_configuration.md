@@ -8,13 +8,23 @@ This skill explains how to configure the project for your environment and data. 
 
 ## Configuration File
 
-The single configuration file is:
+The primary configuration file is:
 
 ```
 config/paths.py
 ```
 
-This is the **only file you need to edit** when moving the project to a new environment.
+For the **default 5 sources with standard NPZ naming**, this is the **only file you need to edit** when moving to a new environment.
+
+### When you need to edit other files
+
+| Scenario | What to edit |
+|----------|-------------|
+| Different run numbers or sources | `SOURCES` list in `config/paths.py` |
+| Different NPZ file naming convention | `resolve_input_path()` in `src/MCBased_Fitter.py` |
+| Adding a new source type | New fitter in `fitters/` + import in `src/MCBased_Fitter.py` |
+| ROOT→NPZ conversion | `src/convert_root_to_npz.py` (requires ROOT environment) |
+| O16/AmC source | Not yet integrated into the default pipeline (see `01_project_overview.md`)
 
 ---
 

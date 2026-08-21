@@ -12,14 +12,17 @@ This is a **standalone Python fitting workflow** for JUNO (Jiangmen Underground 
 
 ### Supported Calibration Sources
 
-| Source | True Energy (MeV) | Type |
-|--------|:-----------------:|------|
-| Ge68   | 0.8845            | Gamma (e⁺e⁻ annihilation) |
-| Cs137  | 0.662             | Mono-energetic gamma |
-| Mn54   | 0.835             | Mono-energetic gamma |
-| Co60   | 2.506             | Two gamma cascade (1.173 + 1.332 MeV) |
-| K40    | 1.461             | Mono-energetic gamma |
-| AmC/O16 | 6.13 (prompt)     | Neutron capture + O16 de-excitation |
+The default pipeline configuration supports these 5 sources at CD center:
+
+| Source | True Energy (MeV) | Type | Default Fitter |
+|--------|:-----------------:|------|:--------------:|
+| Ge68   | 0.8845            | Gamma (e⁺e⁻ annihilation) | FastGe68Fitter |
+| Cs137  | 0.662             | Mono-energetic gamma | FastSourceFitter |
+| Mn54   | 0.835             | Mono-energetic gamma | FastSourceFitter |
+| Co60   | 2.506             | Two gamma cascade (1.173 + 1.332 MeV) | FastSourceFitter |
+| K40    | 1.461             | Mono-energetic gamma | FastSourceFitter |
+
+> ⚠️ **AmC / O16**: The repository includes O16/AmC fitter code (`fitters/O16Fitter.py`), but it is **not** part of the default pipeline because it requires data from the `correlate_selection` chain (different NPZ format) and has not been validated end-to-end in this standalone project.
 
 ### Pipeline Outputs
 

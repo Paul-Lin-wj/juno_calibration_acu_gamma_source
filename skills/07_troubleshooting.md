@@ -220,3 +220,24 @@ If you encounter an issue not covered here:
 2. **Check the result NPZ**: `center_gauss` for peak position, `chi2`/`ndf` for fit quality
 3. **Check the console output**: Was the fit successful? What's the χ²?
 4. **Verify inputs**: Is the data file valid? Is the run mapped correctly in `CalibRUN.csv`?
+
+### Problem: Calling low-level functions directly fails
+
+**Symptom**: Import errors when calling `from fitters.Cs137Fitter import Cs137Fitter` or `from src.FastGe68Fitter import run_fast_ge68_fitter` from a plain Python shell.
+
+**Cause**: The project uses imports like `from fitters.xxx import ...` and `from src.xxx import ...`. These require the project root and subdirectories to be on `sys.path`. The `run_pipeline.sh` script handles this, but direct Python calls do not.
+
+**Solution**: Use one of these entry points:
+1. **`bash run_pipeline.sh`** — handles all paths automatically
+2. Add paths manually when calling directly:
+   ```python
+   import sys
+   sys.path.insert(0, "/path/to/standalone_fitter")
+   sys.path.insert(0, "/path/to/standalone_fitter/src")
+   sys.path.insert(0, "/path/to/standalone_fitter/fitters")
+   sys.path.insert(0, "/path/to/standalone_fitter/smx_ana")
+   ```
+
+---
+
+## Getting Help

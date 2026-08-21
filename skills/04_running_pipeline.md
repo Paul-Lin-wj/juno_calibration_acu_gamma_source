@@ -115,12 +115,19 @@ Each `.npz` contains a dictionary with keys:
 
 ## Running Individual Sources
 
-To fit a single source without the full pipeline:
+To fit a single source without the full pipeline, you need to set up the Python path first:
 
 ```bash
-# Fast Ge68 fitter (recommended for Ge68)
+# Fast Ge68 fitter
 source .venv/bin/activate
+PROJ_DIR="$(pwd)"
 python -c "
+import sys
+sys.path.insert(0, '${PROJ_DIR}')
+sys.path.insert(0, '${PROJ_DIR}/src')
+sys.path.insert(0, '${PROJ_DIR}/fitters')
+sys.path.insert(0, '${PROJ_DIR}/smx_ana')
+
 from src.FastGe68Fitter import run_fast_ge68_fitter
 outputs = run_fast_ge68_fitter(
     run_id=9541,
@@ -133,8 +140,34 @@ outputs = run_fast_ge68_fitter(
 print(outputs['result_npz'])
 "
 
-# Classic fitter (for other sources)
+# Fast source fitter (Cs137, Mn54, Co60, K40)
 python -c "
+import sys
+sys.path.insert(0, '${PROJ_DIR}')
+sys.path.insert(0, '${PROJ_DIR}/src')
+sys.path.insert(0, '${PROJ_DIR}/fitters')
+sys.path.insert(0, '${PROJ_DIR}/smx_ana')
+
+from src.FastSourceFitter import run_fast_source_fitter
+outputs = run_fast_source_fitter(
+    source='Cs137',
+    run_id=9600,
+    input_path='/path/to/Run9600_SelectionResult.npz',
+    output_fig_dir='output/figures',
+    output_res_dir='output/results',
+    enable_c14=True,
+)
+print(outputs['result_npz'])
+"
+
+# Classic fitter (fallback, for comparison)
+python -c "
+import sys
+sys.path.insert(0, '${PROJ_DIR}')
+sys.path.insert(0, '${PROJ_DIR}/src')
+sys.path.insert(0, '${PROJ_DIR}/fitters')
+sys.path.insert(0, '${PROJ_DIR}/smx_ana')
+
 from src.MCBased_Fitter import run_fitter
 outputs = run_fitter(
     run_id=9600,
@@ -146,6 +179,8 @@ outputs = run_fitter(
 print(outputs['result_npz'])
 "
 ```
+
+> ⚠️ The `sys.path.insert` calls are required because the fitter modules use `from fitters.xxx import ...` and `from src.xxx import ...` style imports. The `run_pipeline.sh` script handles this automatically — these manual steps are only needed when calling individual fitters directly.
 
 ---
 
@@ -173,7 +208,7 @@ Key indicators:
 
 ## Performance Benchmarks
 
-Measured on: Intel Xeon Platinum 8358P (128 logical cores / 1TB RAM)
+Measured on: **Intel Xeon Platinum 8358P** (128 logical cores, 1 TB RAM), **Python 3.12.3**, **serial execution** (single core), **~22k events** per run, **after first-run cache warmup**.
 
 | Source | Fitter Type | Single Run | 41 Runs (serial) | 41 Runs (parallel) |
 |--------|:-----------:|:----------:|:-----------------:|:------------------:|
@@ -183,6 +218,8 @@ Measured on: Intel Xeon Platinum 8358P (128 logical cores / 1TB RAM)
 | Cs137 | Classic | ~7-15 s | ~5-10 min | ~10-20 s (41 cores) |
 | Co60 | Fast | **~0.5 s** | **~20 s** | **~0.5 s** (41 cores) |
 | Co60 | Classic | ~15-27 s | ~10-18 min | ~30-60 s (41 cores) |
+
+> **Performance notes**: Times may vary depending on CPU, event count, Python version, and whether matplotlib/smx_ana caches are warm. The first run after a fresh `.venv` may be slower due to matplotlib font cache initialization. Parallel execution assumes independent runs — no shared state.
 
 ---
 
