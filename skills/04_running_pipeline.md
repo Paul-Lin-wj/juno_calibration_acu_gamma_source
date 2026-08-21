@@ -228,3 +228,52 @@ Measured on: **Intel Xeon Platinum 8358P** (128 logical cores, 1 TB RAM), **Pyth
 - **Each run creates a new timestamp directory** — no output is overwritten
 - To re-run with the same configuration: just run `bash run_pipeline.sh` again
 - To compare results from different runs: look in different `output/*/` directories
+
+---
+
+## Multi-Batch Processing (Multiple Time Periods)
+
+There is **no separate multi-batch script**. To process multiple batches of runs
+(e.g. several data-taking periods), run the normal pipeline once per batch —
+each run gets its own timestamped directory and full audit log.
+
+### Recommended Agent Workflow
+
+1. **Prepare batch configurations** — for each batch, edit `SOURCES` in
+   `config/paths.py` to the runs of that period (see `03_configuration.md`).
+2. **Run once per batch**:
+
+   ```bash
+   bash run_pipeline.sh        # batch 1 → output/YYYYMMDD_HHMMSS_1/
+   # edit config/paths.py SOURCES for batch 2
+   bash run_pipeline.sh        # batch 2 → output/YYYYMMDD_HHMMSS_2/
+   ```
+
+3. **Compare batches** with `plot_fit_summary.py` using multiple result dirs:
+
+   ```bash
+   source .venv/bin/activate
+   python src/plot_fit_summary.py \
+       --results-dir "Phase1=output/20260101_000000/results" \
+       --results-dir "Phase2=output/20260201_000000/results" \
+       --run-info CalibRUN.csv \
+       --outdir output/comparison
+   ```
+
+   This produces μ-vs-Z and σ/E-vs-Z plots with a **ratio panel** comparing
+   the two batches (see `08_zscan_analysis.md` for interpretation).
+
+4. **For agent-driven batch runs**, pass agent metadata on each invocation:
+
+   ```bash
+   python pipeline/run_fit_all.py \
+       --launched-by agent \
+       --agent-name "YourAgent" \
+       --agent-version "1.0" \
+       --agent-workflow "Batch 1: Aug 2025 sources at CD center"
+   ```
+
+> **Note**: Each batch produces a fully independent `run_log.json` /
+> `run_log.md` / `config_snapshot.json` / `console.log` with its own
+> `run_id`, SHA-256 fingerprints, and source-level status — suitable for
+> third-party audit of every batch separately.
