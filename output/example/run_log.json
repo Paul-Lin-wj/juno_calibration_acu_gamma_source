@@ -1,21 +1,21 @@
 {
   "schema_version": "2.0",
-  "run_id": "20260821T134344_bb96a91b",
+  "run_id": "20260821T141704_d65cd093",
   "status": "completed",
   "pipeline_metadata": {
     "launched_by": "script",
-    "timestamp_start_utc": "2026-08-21T05:43:44.581136Z",
-    "timestamp_start_local": "2026-08-21 13:43:44 CST",
+    "timestamp_start_utc": "2026-08-21T06:17:04.416199Z",
+    "timestamp_start_local": "2026-08-21 14:17:04 CST",
     "system": {
       "hostname": "user-Super-Server",
       "user": "lin",
       "platform": "Linux-6.8.0-136-generic-x86_64-with-glibc2.39",
       "python_version": "3.12.3",
       "python_executable": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/.venv/bin/python",
-      "timestamp_utc": "2026-08-21T05:43:44.582806+00:00"
+      "timestamp_utc": "2026-08-21T06:17:04.418960+00:00"
     },
     "git": {
-      "commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4",
+      "commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b",
       "branch": "main",
       "has_uncommitted_changes": true
     },
@@ -43,6 +43,10 @@
       "scipy==1.18.0",
       "six==1.17.0"
     ],
+    "command": [
+      "pipeline/run_fit_all.py"
+    ],
+    "exit_code": 0,
     "config_files": {
       "paths_py": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/config/paths.py",
       "calib_run_csv": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/CalibRUN.csv",
@@ -65,8 +69,8 @@
         "size_bytes": 75
       }
     },
-    "timestamp_end_utc": "2026-08-21T05:43:52.351669Z",
-    "timestamp_end_local": "2026-08-21 13:43:52 CST"
+    "timestamp_end_utc": "2026-08-21T06:17:14.420498Z",
+    "timestamp_end_local": "2026-08-21 14:17:14 CST"
   },
   "sources": [
     {
@@ -91,7 +95,12 @@
         "sha256": "875b1662638ca16a1e1fc8d5e96741dd96099fb86737da41228e921134d24454",
         "format": ".npz"
       },
-      "mc_template": {},
+      "mc_template": {
+        "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/fitters/Ge68_MCbased_BKG_v4.npz",
+        "exists": true,
+        "size_bytes": 4222558,
+        "sha256": "5d1162aefc1a793fbce59fb5ee4b23e7d4428fd75c46ed2e8b1f98b3476f50d9"
+      },
       "event_statistics": {
         "total_events": 109212,
         "finite_events": 109212,
@@ -515,9 +524,21 @@
       "code_version": {
         "fitter_file": "src/FastGe68Fitter.py",
         "fitter_type": "fast",
-        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
+        "git_commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b"
       },
-      "fitter_parameters": {},
+      "fitter_parameters": {
+        "bins_fit": "arange(0.3, 2.0, 0.004)",
+        "x_limit": 0.51,
+        "enable_c14": true,
+        "c14_convolver": "fft",
+        "fixed_params": {
+          "E_scale": "auto",
+          "a": 3.309,
+          "b": 1.28,
+          "c": 0.0,
+          "C14_Amp": 0.047
+        }
+      },
       "fit_results": {
         "mu": 0.9101949027597278,
         "sigma": 0.03218259328751263,
@@ -528,20 +549,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12370_Ge68.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN12370_Ge68.npz",
           "exists": true,
           "size_bytes": 45991,
           "sha256": "0247b0f4584e2578dc3e19fbf372f8ba986a79db1e5390c620936d6ddf2709ba"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12370_Ge68.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN12370_Ge68.pdf",
           "exists": true,
           "size_bytes": 67863,
-          "sha256": "8a2c01ccb69f4864a87b15df5acf2291fd7d26d2353b9d6793c7054a88933a00"
+          "sha256": "f89e72fb71bbc0a2d01920bd3a2b0200424c832f69c798492ab9383a4f70e53f"
         }
       },
-      "timing_s": 4.470526933670044,
-      "timestamp_utc": "2026-08-21T05:43:49.416759Z"
+      "timing_s": 5.525803327560425,
+      "timestamp_utc": "2026-08-21T06:17:10.365592Z"
     },
     {
       "status": "success",
@@ -565,7 +586,12 @@
         "sha256": "57103a9631b0f699665a078cf9ba2847672e94898ad6ccd504d4e90aebbbff92",
         "format": ".npz"
       },
-      "mc_template": {},
+      "mc_template": {
+        "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/fitters/Cs137_Compton_BKG.npz",
+        "exists": true,
+        "size_bytes": 4358274,
+        "sha256": "dca8575bfbfd45a11a08107ebc903259f0cf9091d0316f5da635670380149f59"
+      },
       "event_statistics": {
         "total_events": 126117,
         "finite_events": 126117,
@@ -989,9 +1015,22 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
+        "git_commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b"
       },
-      "fitter_parameters": {},
+      "fitter_parameters": {
+        "bins_fit": "arange(0.300, 0.900, 0.004)",
+        "x_limit": 0.3,
+        "mc_center": 0.58423,
+        "enable_c14": true,
+        "c14_convolver": "fft",
+        "fixed_params": {
+          "E_scale": "auto",
+          "a": 3.309,
+          "b": 1.28,
+          "c": 0.0,
+          "C14_Amp": 0.05
+        }
+      },
       "fit_results": {
         "mu": 0.6033524748966349,
         "sigma": 0.026550625289198073,
@@ -1002,20 +1041,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12295_Cs137.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN12295_Cs137.npz",
           "exists": true,
           "size_bytes": 13340,
           "sha256": "edea029c1b4f8bb6b3ad02cd2e8638f850fdeb2d6677d73c380086ed639262c5"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12295_Cs137.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN12295_Cs137.pdf",
           "exists": true,
           "size_bytes": 36452,
-          "sha256": "f7711f1afc82d25a0d758ce748817af89fcc7bf973e919737098d71ec261a447"
+          "sha256": "6f417aa9b1d3c268de4728b6674f85d8613f06f6e2b1f07a12350cacd638eb09"
         }
       },
-      "timing_s": 0.5728812217712402,
-      "timestamp_utc": "2026-08-21T05:43:50.068566Z"
+      "timing_s": 0.7760334014892578,
+      "timestamp_utc": "2026-08-21T06:17:11.248247Z"
     },
     {
       "status": "success",
@@ -1039,7 +1078,12 @@
         "sha256": "83ce89e9420ff3c8c97b1a54d28978375dc09177b5f83774d19306d6914a09f7",
         "format": ".npz"
       },
-      "mc_template": {},
+      "mc_template": {
+        "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/fitters/Mn54_Compton_BKG.npz",
+        "exists": true,
+        "size_bytes": 4750834,
+        "sha256": "3e9024acf6784ce7397e3bef1b64a0ddd3ad40bb90e6deba5debc380d5e201db"
+      },
       "event_statistics": {
         "total_events": 41809,
         "finite_events": 41809,
@@ -1463,9 +1507,22 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
+        "git_commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b"
       },
-      "fitter_parameters": {},
+      "fitter_parameters": {
+        "bins_fit": "arange(0.500, 0.996, 0.004)",
+        "x_limit": 0.3,
+        "mc_center": 0.7506673749012558,
+        "enable_c14": true,
+        "c14_convolver": "fft",
+        "fixed_params": {
+          "E_scale": "auto",
+          "a": 3.309,
+          "b": 1.28,
+          "c": 0.0,
+          "C14_Amp": 0.05
+        }
+      },
       "fit_results": {
         "mu": 0.7779750106447804,
         "sigma": 0.03049270454738029,
@@ -1476,20 +1533,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12247_Mn54.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN12247_Mn54.npz",
           "exists": true,
           "size_bytes": 12092,
           "sha256": "d2059fed24e8c0fd84cc4afb25d4b139537ae6075c6e8eaa8c84e3e3baaace51"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12247_Mn54.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN12247_Mn54.pdf",
           "exists": true,
           "size_bytes": 36646,
-          "sha256": "68462b77862b1d19c8978b1fa342491e8b880a3d3b19d0aa997d80a8750ec814"
+          "sha256": "1245fb4759890be1c9294a113df7583a31ceea9d13af1fa78b43d0dc48b04944"
         }
       },
-      "timing_s": 0.5120179653167725,
-      "timestamp_utc": "2026-08-21T05:43:50.619801Z"
+      "timing_s": 0.7377705574035645,
+      "timestamp_utc": "2026-08-21T06:17:12.043937Z"
     },
     {
       "status": "success",
@@ -1513,7 +1570,12 @@
         "sha256": "317a6e726591fbe0a0c58d0f430f0aa5f65fa95d8a14382154c63ab1064c478d",
         "format": ".npz"
       },
-      "mc_template": {},
+      "mc_template": {
+        "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/fitters/Co60_Compton_BKG.npz",
+        "exists": true,
+        "size_bytes": 5182286,
+        "sha256": "be7dfba88a54440ddf44a1a9781f7c8771a03f7e8d92d2a2a9b27510b1656a97"
+      },
       "event_statistics": {
         "total_events": 107466,
         "finite_events": 107466,
@@ -1937,9 +1999,22 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
+        "git_commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b"
       },
-      "fitter_parameters": {},
+      "fitter_parameters": {
+        "bins_fit": "arange(1.900, 2.700, 0.004)",
+        "x_limit": 1.0,
+        "mc_center": 2.305448059680732,
+        "enable_c14": true,
+        "c14_convolver": "fft",
+        "fixed_params": {
+          "E_scale": "auto",
+          "a": 3.309,
+          "b": 1.28,
+          "c": 0.0,
+          "C14_Amp": 0.05
+        }
+      },
       "fit_results": {
         "mu": 2.41126112984638,
         "sigma": 0.056469501704417294,
@@ -1950,20 +2025,20 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN12216_Co60.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN12216_Co60.npz",
           "exists": true,
           "size_bytes": 15740,
           "sha256": "48b340520a554b3479706a9ca575cb6fd734209f2aec37c1c5e12ce7d276799d"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN12216_Co60.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN12216_Co60.pdf",
           "exists": true,
           "size_bytes": 38538,
-          "sha256": "157279a15bfeb1856de9cd40e42289885cedf7eb588397dc3f24f0d3311c3415"
+          "sha256": "db445a693d8e8c0aed19380686e9df324596d45cff6fdb0bc31bd75adf270867"
         }
       },
-      "timing_s": 0.6014206409454346,
-      "timestamp_utc": "2026-08-21T05:43:51.286675Z"
+      "timing_s": 0.8167753219604492,
+      "timestamp_utc": "2026-08-21T06:17:12.953467Z"
     },
     {
       "status": "success",
@@ -1987,7 +2062,12 @@
         "sha256": "21da388b126da04f2a21f5a06eafe33184b83526f74c2c5bba9a221bae8ba955",
         "format": ".npz"
       },
-      "mc_template": {},
+      "mc_template": {
+        "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/fitters/K40_Compton_BKG.npz",
+        "exists": true,
+        "size_bytes": 4063310,
+        "sha256": "847bcc20c7f78a31c89dea400adec83ff7b822b3f52acb6f79a50fbc98e98fcc"
+      },
       "event_statistics": {
         "total_events": 29238,
         "finite_events": 29238,
@@ -2411,9 +2491,22 @@
       "code_version": {
         "fitter_file": "src/FastSourceFitter.py",
         "fitter_type": "fast",
-        "git_commit": "906f5c08aa317de4c8bbbd0d802eb9c8bf2488b4"
+        "git_commit": "32fd3cc8ba8f1107c03a3e61ca19d6cfb40f6f3b"
       },
-      "fitter_parameters": {},
+      "fitter_parameters": {
+        "bins_fit": "arange(1.000, 1.796, 0.004)",
+        "x_limit": 0.6,
+        "mc_center": 1.3550554274479678,
+        "enable_c14": true,
+        "c14_convolver": "fft",
+        "fixed_params": {
+          "E_scale": "auto",
+          "a": 3.309,
+          "b": 1.28,
+          "c": 0.0,
+          "C14_Amp": 0.05
+        }
+      },
       "fit_results": {
         "mu": 1.4157769754405678,
         "sigma": 0.04223911470511692,
@@ -2424,29 +2517,29 @@
       },
       "output_files": {
         "result_npz": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/results/RUN9632_K40.npz",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN9632_K40.npz",
           "exists": true,
           "size_bytes": 15692,
           "sha256": "41ccea147e2e7da1907ac7537be4f8ce100cc4b49c953ef01326fad7a2753431"
         },
         "figure": {
-          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344/figures/RUN9632_K40.pdf",
+          "path": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN9632_K40.pdf",
           "exists": true,
           "size_bytes": 37440,
-          "sha256": "70cceb7e8ef58dcf3ab6980e5a1733efc4754501b62687dea6e5bd5fd8ab7986"
+          "sha256": "c700269939113094e002e811f2d8676ed074314da49511eb2baa23b299e94fb1"
         }
       },
-      "timing_s": 0.44423389434814453,
-      "timestamp_utc": "2026-08-21T05:43:51.759733Z"
+      "timing_s": 0.6092126369476318,
+      "timestamp_utc": "2026-08-21T06:17:13.608140Z"
     }
   ],
   "errors": [],
   "summary": {
     "total_sources_configured": 5,
     "total_sources_fitted": 5,
-    "total_time_s": "7.5",
+    "total_time_s": "9.7",
     "sources": "Ge68, Cs137, Mn54, Co60, K40",
-    "output_directory": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_134344"
+    "output_directory": "/datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704"
   },
   "agent_notes": null
 }

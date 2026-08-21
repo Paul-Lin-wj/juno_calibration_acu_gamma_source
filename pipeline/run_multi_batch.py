@@ -5,7 +5,7 @@ time periods, each in its own timestamped output directory with full logs.
 """
 from __future__ import annotations
 
-import os, sys, time
+import os, sys, time, argparse, contextlib
 from pathlib import Path
 
 _PROJ_ROOT = Path(__file__).resolve().parent.parent
@@ -54,6 +54,14 @@ OUTPUT_ROOT = _PROJ_ROOT / "output"
 COLORS = {"Ge68":"#1f77b4","Cs137":"#ff7f0e","Mn54":"#d62728","Co60":"#2ca02c","K40":"#9467bd"}
 MARKERS = {"Ge68":"o","Cs137":"s","Mn54":"^","Co60":"D","K40":"v"}
 
+# CLI args for agent-driven runs
+_parser = argparse.ArgumentParser(description="JUNO multi-batch fitter pipeline")
+_parser.add_argument("--launched-by", default="script", choices=["script", "agent"])
+_parser.add_argument("--agent-name", default="")
+_parser.add_argument("--agent-version", default="")
+_parser.add_argument("--agent-workflow", default="")
+_args, _unknown = _parser.parse_known_args()
+
 results_summary = {}
 
 for batch_name, sources in BATCHES:
@@ -66,140 +74,153 @@ for batch_name, sources in BATCHES:
     batch_output_dir = OUTPUT_ROOT / f"{timestamp}_{batch_name}"
 
     with RunLogger(output_dir=batch_output_dir, project_root=_PROJ_ROOT,
-                   launched_by="script") as logger:
-        logger.save_config_snapshot()
+                   launched_by=_args.launched_by) as logger:
+        logger.record_command(sys.argv)
 
-        for src_name, run_id, e_true, fitter_type in sources:
-            input_path = f"{DATA_BASE}/Run{run_id}_SelectionResult.npz"
-            if not os.path.exists(input_path):
-                print(f"  [SKIP] {src_name} RUN{run_id}: data not found")
-                logger.add_source_record(
-                    src_name=src_name, run_id=run_id, e_true=e_true,
-                    fitter_type=fitter_type, fitter_file="N/A",
-                    input_path=input_path, output_files={},
-                    status="skipped", error_message=f"Data not found: {input_path}",
-                )
-                continue
-
-            output_stem = f"RUN{run_id}_{src_name}"
-            fig_dir = str(batch_output_dir / "figures")
-            res_dir = str(batch_output_dir / "results")
-            os.makedirs(fig_dir, exist_ok=True)
-            os.makedirs(res_dir, exist_ok=True)
-
-            event_data = None
-            try:
-                event_data = normalize_event_input(input_path, src_name)
-            except Exception:
-                pass
-
-            t0 = time.time()
-            source_status = "success"
-            source_error = None
-            outputs = {}
-            fitter_file = "src/MCBased_Fitter.py"
-
-            try:
-                if fitter_type == "fast" and src_name == "Ge68":
-                    from src.FastGe68Fitter import run_fast_ge68_fitter
-                    outputs = run_fast_ge68_fitter(
-                        run_id=run_id, input_path=input_path,
-                        output_fig_dir=fig_dir, output_res_dir=res_dir,
-                        output_stem=output_stem, enable_c14=True,
-                        c14_convolver="fft", results_only=False,
-                    )
-                    fitter_file = "src/FastGe68Fitter.py"
-                elif fitter_type == "fast":
-                    from src.FastSourceFitter import run_fast_source_fitter
-                    outputs = run_fast_source_fitter(
-                        source=src_name, run_id=run_id, input_path=input_path,
-                        output_fig_dir=fig_dir, output_res_dir=res_dir,
-                        output_stem=output_stem, enable_c14=True,
-                        c14_convolver="fft", results_only=False,
-                    )
-                    fitter_file = "src/FastSourceFitter.py"
-                else:
-                    from src.MCBased_Fitter import run_fitter as run_classic_fitter
-                    outputs = run_classic_fitter(
-                        run_id=run_id, source=src_name, input_path=input_path,
-                        output_fig_dir=fig_dir, output_res_dir=res_dir,
-                        output_stem=output_stem, enable_c14=True,
-                    )
-            except Exception as e:
-                source_status = "failed"
-                source_error = str(e)
-                import traceback; traceback.print_exc()
-                print(f"  [{src_name:6}] RUN{run_id} FAILED: {e}")
-
-            elapsed = time.time() - t0
-            fit_results = {}
-            mu = sigma = se = 0
-
-            if source_status == "success" and outputs.get("result_npz"):
-                data = np.load(outputs["result_npz"], allow_pickle=True)
-                cv = data["center_gauss"].item()
-                sv = data["sigma_gauss"].item()
-                mu = cv["value"]; sigma = sv["value"]
-                chi2 = float(data["chi2"]); ndf = int(data["ndf"])
-                se = sigma / mu * 100
-                data.close()
-                fit_results = {"mu": mu, "sigma": sigma, "sigma_over_e_pct": se, "chi2": chi2, "ndf": ndf}
-
-            results_summary.setdefault(batch_name, {})[src_name] = {
-                "run": run_id, "mu": mu, "se": se, "t": elapsed,
-            }
-
-            output_files = {}
-            if outputs.get("result_npz"):
-                output_files["result_npz"] = outputs["result_npz"]
-            for key in ["figure", "log_figure", "full_figure", "zoom_figure"]:
-                if outputs.get(key):
-                    output_files[key] = outputs[key]
-
-            logger.add_source_record(
-                src_name=src_name, run_id=run_id, e_true=e_true,
-                fitter_type=fitter_type, fitter_file=fitter_file,
-                input_path=input_path, output_files=output_files,
-                event_data=event_data, fit_results=fit_results,
-                elapsed_s=elapsed, status=source_status, error_message=source_error,
+        if _args.launched_by == "agent" and _args.agent_name:
+            logger.set_agent_info(
+                agent_name=_args.agent_name,
+                agent_version=_args.agent_version,
+                workflow_description=_args.agent_workflow,
             )
 
-            if source_status == "success":
-                print(f"  [{src_name:6}] RUN{run_id}  μ={mu:.4f}  σ/E={se:.2f}%  "
-                      f"χ²/ndf={chi2:.0f}/{ndf}  {elapsed:.1f}s")
-            else:
-                print(f"  [{src_name:6}] RUN{run_id}  FAILED: {source_error}")
+        logger.save_config_snapshot()
+        _tee_stdout = logger.ConsoleTee(sys.stdout, logger)
+        _tee_stderr = logger.ConsoleTee(sys.stderr, logger)
 
-        # ENL-style plot
-        batch_results = results_summary.get(batch_name, {})
-        if len(batch_results) >= 2:
-            fig, ax = plt.subplots(figsize=(7, 5))
-            e_fine = np.linspace(0.4, 2.8, 200)
-            ax.plot(e_fine, np.sqrt((3.309/np.sqrt(e_fine))**2+1.28**2),
-                    "k--", alpha=0.35, lw=1.5, label="JUNO ref (a=3.31, b=1.28)")
-            for src, r in batch_results.items():
-                ax.errorbar(r["mu"], r["se"], fmt=MARKERS.get(src, "o"),
-                            color=COLORS.get(src, "gray"), markersize=10, capsize=4, label=src)
-                ax.annotate(f"{src}\n({r['se']:.2f}%)", (r["mu"], r["se"]),
-                            textcoords="offset points", xytext=(10, 8), fontsize=10,
-                            color=COLORS.get(src, "gray"))
-            ax.set_xlim(0.4, 2.8); ax.set_ylim(1.5, 5.5)
-            ax.set_xlabel(r"$E_{\mathrm{rec}}$ [MeV]", fontsize=14)
-            ax.set_ylabel(r"$\sigma/\mu$ [%]", fontsize=14)
-            ax.set_title(f"Energy Resolution — {batch_name}", fontsize=13, fontweight="bold")
-            ax.tick_params(direction="in", top=True, right=True, labelsize=12)
-            ax.grid(True, alpha=0.3, linestyle=":"); ax.legend(fontsize=11, loc="upper right")
-            png = str(batch_output_dir / "enl_style_resolution.png")
-            pdf = str(batch_output_dir / "enl_style_resolution.pdf")
-            plt.savefig(png, dpi=200, bbox_inches="tight")
-            plt.savefig(pdf, bbox_inches="tight"); plt.close()
-            print(f"  [Plot] {png}")
+        with contextlib.redirect_stdout(_tee_stdout), contextlib.redirect_stderr(_tee_stderr):
 
-        logger.set_summary({
-            "batch": batch_name,
-            "sources_configured": len(sources),
-            "output_directory": str(batch_output_dir),
-        })
+            for src_name, run_id, e_true, fitter_type in sources:
+                input_path = f"{DATA_BASE}/Run{run_id}_SelectionResult.npz"
+                if not os.path.exists(input_path):
+                    print(f"  [SKIP] {src_name} RUN{run_id}: data not found")
+                    logger.add_source_record(
+                        src_name=src_name, run_id=run_id, e_true=e_true,
+                        fitter_type=fitter_type, fitter_file="N/A",
+                        input_path=input_path, output_files={},
+                        status="skipped", error_message=f"Data not found: {input_path}",
+                    )
+                    continue
+
+                output_stem = f"RUN{run_id}_{src_name}"
+                fig_dir = str(batch_output_dir / "figures")
+                res_dir = str(batch_output_dir / "results")
+                os.makedirs(fig_dir, exist_ok=True)
+                os.makedirs(res_dir, exist_ok=True)
+
+                event_data = None
+                try:
+                    event_data = normalize_event_input(input_path, src_name)
+                except Exception:
+                    pass
+
+                t0 = time.time()
+                source_status = "success"
+                source_error = None
+                outputs = {}
+                fitter_file = "src/MCBased_Fitter.py"
+
+                try:
+                    if fitter_type == "fast" and src_name == "Ge68":
+                        from src.FastGe68Fitter import run_fast_ge68_fitter
+                        outputs = run_fast_ge68_fitter(
+                            run_id=run_id, input_path=input_path,
+                            output_fig_dir=fig_dir, output_res_dir=res_dir,
+                            output_stem=output_stem, enable_c14=True,
+                            c14_convolver="fft", results_only=False,
+                        )
+                        fitter_file = "src/FastGe68Fitter.py"
+                    elif fitter_type == "fast":
+                        from src.FastSourceFitter import run_fast_source_fitter
+                        outputs = run_fast_source_fitter(
+                            source=src_name, run_id=run_id, input_path=input_path,
+                            output_fig_dir=fig_dir, output_res_dir=res_dir,
+                            output_stem=output_stem, enable_c14=True,
+                            c14_convolver="fft", results_only=False,
+                        )
+                        fitter_file = "src/FastSourceFitter.py"
+                    else:
+                        from src.MCBased_Fitter import run_fitter as run_classic_fitter
+                        outputs = run_classic_fitter(
+                            run_id=run_id, source=src_name, input_path=input_path,
+                            output_fig_dir=fig_dir, output_res_dir=res_dir,
+                            output_stem=output_stem, enable_c14=True,
+                        )
+                except Exception as e:
+                    source_status = "failed"
+                    source_error = str(e)
+                    import traceback; traceback.print_exc()
+                    print(f"  [{src_name:6}] RUN{run_id} FAILED: {e}")
+
+                elapsed = time.time() - t0
+                fit_results = {}
+                mu = sigma = se = 0
+
+                if source_status == "success" and outputs.get("result_npz"):
+                    data = np.load(outputs["result_npz"], allow_pickle=True)
+                    cv = data["center_gauss"].item()
+                    sv = data["sigma_gauss"].item()
+                    mu = cv["value"]; sigma = sv["value"]
+                    chi2 = float(data["chi2"]); ndf = int(data["ndf"])
+                    se = sigma / mu * 100
+                    data.close()
+                    fit_results = {"mu": mu, "sigma": sigma, "sigma_over_e_pct": se, "chi2": chi2, "ndf": ndf}
+
+                results_summary.setdefault(batch_name, {})[src_name] = {
+                    "run": run_id, "mu": mu, "se": se, "t": elapsed,
+                }
+
+                output_files = {}
+                if outputs.get("result_npz"):
+                    output_files["result_npz"] = outputs["result_npz"]
+                for key in ["figure", "log_figure", "full_figure", "zoom_figure"]:
+                    if outputs.get(key):
+                        output_files[key] = outputs[key]
+
+                logger.add_source_record(
+                    src_name=src_name, run_id=run_id, e_true=e_true,
+                    fitter_type=fitter_type, fitter_file=fitter_file,
+                    input_path=input_path, output_files=output_files,
+                    event_data=event_data, fit_results=fit_results,
+                    elapsed_s=elapsed, status=source_status, error_message=source_error,
+                )
+
+                if source_status == "success":
+                    print(f"  [{src_name:6}] RUN{run_id}  μ={mu:.4f}  σ/E={se:.2f}%  "
+                          f"χ²/ndf={chi2:.0f}/{ndf}  {elapsed:.1f}s")
+                else:
+                    print(f"  [{src_name:6}] RUN{run_id}  FAILED: {source_error}")
+
+            # ENL-style plot
+            batch_results = results_summary.get(batch_name, {})
+            if len(batch_results) >= 2:
+                fig, ax = plt.subplots(figsize=(7, 5))
+                e_fine = np.linspace(0.4, 2.8, 200)
+                ax.plot(e_fine, np.sqrt((3.309/np.sqrt(e_fine))**2+1.28**2),
+                        "k--", alpha=0.35, lw=1.5, label="JUNO ref (a=3.31, b=1.28)")
+                for src, r in batch_results.items():
+                    ax.errorbar(r["mu"], r["se"], fmt=MARKERS.get(src, "o"),
+                                color=COLORS.get(src, "gray"), markersize=10, capsize=4, label=src)
+                    ax.annotate(f"{src}\n({r['se']:.2f}%)", (r["mu"], r["se"]),
+                                textcoords="offset points", xytext=(10, 8), fontsize=10,
+                                color=COLORS.get(src, "gray"))
+                ax.set_xlim(0.4, 2.8); ax.set_ylim(1.5, 5.5)
+                ax.set_xlabel(r"$E_{\mathrm{rec}}$ [MeV]", fontsize=14)
+                ax.set_ylabel(r"$\sigma/\mu$ [%]", fontsize=14)
+                ax.set_title(f"Energy Resolution — {batch_name}", fontsize=13, fontweight="bold")
+                ax.tick_params(direction="in", top=True, right=True, labelsize=12)
+                ax.grid(True, alpha=0.3, linestyle=":"); ax.legend(fontsize=11, loc="upper right")
+                png = str(batch_output_dir / "enl_style_resolution.png")
+                pdf = str(batch_output_dir / "enl_style_resolution.pdf")
+                plt.savefig(png, dpi=200, bbox_inches="tight")
+                plt.savefig(pdf, bbox_inches="tight"); plt.close()
+                print(f"  [Plot] {png}")
+
+            logger.set_summary({
+                "batch": batch_name,
+                "sources_configured": len(sources),
+                "output_directory": str(batch_output_dir),
+            })
 
     print(f"  [Output] {batch_output_dir}")
 

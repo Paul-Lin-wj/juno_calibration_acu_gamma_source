@@ -202,6 +202,8 @@ class RunLogger:
                 },
                 "packages": _get_package_versions(),
                 "pip_freeze": _get_pip_freeze(),
+                "command": [],
+                "exit_code": None,
                 "config_files": cfg_files,
                 "config_snapshot": config_snapshot,
             },
@@ -268,6 +270,14 @@ class RunLogger:
     def write_console(self, text):
         self._console_lines.append(text)
 
+    def record_command(self, command_list):
+        """Record the exact command used to launch the pipeline."""
+        self.record["pipeline_metadata"]["command"] = [str(c) for c in command_list]
+
+    def set_exit_code(self, code):
+        """Record the process exit code (0 = success)."""
+        self.record["pipeline_metadata"]["exit_code"] = int(code)
+
     def flush_console_log(self):
         if not self._console_lines:
             return
@@ -278,6 +288,25 @@ class RunLogger:
             print(f"[Log] Console log: {console_path}", flush=True)
         except Exception as e:
             print(f"[Log] Failed to write console log: {e}", flush=True)
+
+    class ConsoleTee:
+        """Tee stream: writes to both a target stream (e.g. sys.stdout) and the logger.
+
+        Usage:
+            with contextlib.redirect_stdout(logger.ConsoleTee(sys.stdout, logger)):
+                ...
+        """
+
+        def __init__(self, target, logger):
+            self._target = target
+            self._logger = logger
+
+        def write(self, data):
+            self._target.write(data)
+            self._logger.write_console(data.rstrip("\n"))
+
+        def flush(self):
+            self._target.flush()
 
     def add_source_record(self, *, src_name, run_id, e_true, fitter_type,
                           fitter_file, input_path, output_files,
@@ -416,7 +445,14 @@ class RunLogger:
         lines.append(f"**Status**: `{r['status']}`")
         lines.append(f"**Launched by**: `{m['launched_by']}`")
         lines.append(f"**Start (UTC)**: {m.get('timestamp_start_utc', '?')}")
-        lines.append(f"**End (UTC)**:   {m.get('timestamp_end_utc', '?')}\n")
+        lines.append(f"**End (UTC)**:   {m.get('timestamp_end_utc', '?')}")
+
+        if m.get("command"):
+            lines.append("")
+            lines.append(f"**Command**: `{' '.join(m['command'])}`")
+            if m.get("exit_code") is not None:
+                lines.append(f"**Exit code**: `{m['exit_code']}`")
+        lines.append("")
 
         s = m["system"]
         lines.append("## System Information\n")
