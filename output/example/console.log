@@ -3,7 +3,7 @@
 
 [Ge68] RUN12370 (E_true=0.8845 MeV)
 
-[Ge68] Input: /lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12370_SelectionResult.npz
+[Ge68] Input: /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_esd2npz/output/latest/results/selection_npz/Run12370_SelectionResult.npz
 
 Project root path:
  
@@ -13,88 +13,38 @@ Project root path:
 
 [Progress] Fast Ge68 fit finished for RUN12370_Ge68
 
-[Output] Fit results saved to: /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/results/RUN12370_Ge68.npz
+[Output] Fit results saved to: /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260825_090333/results/RUN12370_Ge68.npz
 
-[Output] Log-y figure saved to: /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/figures/RUN12370_Ge68.pdf
+[Output] Log-y figure saved to: /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260825_090333/figures/RUN12370_Ge68.pdf
 
-[Ge68] mu=0.9102, sigma/E=3.54%, chi2/ndf=600/358, time=5.5s
+[Ge68] mu=0.9102, sigma/E=3.54%, chi2/ndf=600/358, time=4.1s
 
+[Warning] Cs137 RUN12295: data not found at /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_esd2npz/output/latest/results/selection_npz/Run12295_SelectionResult.npz, skip
 
-============================================================
+[Warning] Mn54 RUN12247: data not found at /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_esd2npz/output/latest/results/selection_npz/Run12247_SelectionResult.npz, skip
 
-[Cs137] RUN12295 (E_true=0.662 MeV)
+[Warning] Co60 RUN12216: data not found at /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_esd2npz/output/latest/results/selection_npz/Run12216_SelectionResult.npz, skip
 
-[Cs137] Input: /lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12295_SelectionResult.npz
-
-[Info] Starting fast Cs137 fit for RUN12295_Cs137
-
-[Progress] Fast Cs137 fit finished for RUN12295_Cs137
-
-[Cs137] mu=0.6034, sigma/E=4.40%, chi2/ndf=226/122, time=0.8s
+[Warning] K40 RUN9632: data not found at /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_esd2npz/output/latest/results/selection_npz/Run9632_SelectionResult.npz, skip
 
 
 ============================================================
 
-[Mn54] RUN12247 (E_true=0.835 MeV)
-
-[Mn54] Input: /lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12247_SelectionResult.npz
-
-[Info] Starting fast Mn54 fit for RUN12247_Mn54
-
-[Progress] Fast Mn54 fit finished for RUN12247_Mn54
-
-[Mn54] mu=0.7780, sigma/E=3.92%, chi2/ndf=149/111, time=0.7s
-
-
-============================================================
-
-[Co60] RUN12216 (E_true=2.506 MeV)
-
-[Co60] Input: /lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run12216_SelectionResult.npz
-
-[Info] Starting fast Co60 fit for RUN12216_Co60
-
-[Progress] Fast Co60 fit finished for RUN12216_Co60
-
-[Co60] mu=2.4113, sigma/E=2.34%, chi2/ndf=255/183, time=0.8s
-
-
-============================================================
-
-[K40] RUN9632 (E_true=1.461 MeV)
-
-[K40] Input: /lustrefs/juno26/users/zhaorz/Calib/ReProd26B/singles_selection/Results_fromFinalcorrection/npz/Run9632_SelectionResult.npz
-
-[Info] Starting fast K40 fit for RUN9632_K40
-
-[Progress] Fast K40 fit finished for RUN9632_K40
-
-[K40] mu=1.4158, sigma/E=2.98%, chi2/ndf=154/145, time=0.6s
-
-
-============================================================
-
-Total time: 8.9s
+Total time: 4.1s
 
 
 Source   E_true     E_rec      sigma/E    chi2/ndf     Time       Fitter    
 
 ----------------------------------------------------------------------
 
-Ge68     0.884      0.9102     3.54      % 600/358   5.5     s fast      
-
-Cs137    0.662      0.6034     4.40      % 226/122   0.8     s fast      
-
-Mn54     0.835      0.7780     3.92      % 149/111   0.7     s fast      
-
-Co60     2.506      2.4113     2.34      % 255/183   0.8     s fast      
-
-K40      1.461      1.4158     2.98      % 154/145   0.6     s fast      
+Ge68     0.884      0.9102     3.54      % 600/358   4.1     s fast      
 
 
 Drawing ENL-style resolution plot...
 
-Saved /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/enl_style_resolution.png
+Saved /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260825_090333/enl_style_resolution.png
 
-Saved /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260821_141704/enl_style_resolution.pdf
+Saved /datafs/users/lin/workplace/energy_reco/ENL_agent/standalone_fitter/output/20260825_090333/enl_style_resolution.pdf
+
+[AUDIT] PASSED (53 code files, outputs complete)
 

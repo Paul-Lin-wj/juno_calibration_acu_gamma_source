@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+TMP/
+*.egg-info/
+
+# Output (runtime results)
+output/*
+!output/example/
+
+# IDE
+.vscode/
+.idea/
+*.swp
