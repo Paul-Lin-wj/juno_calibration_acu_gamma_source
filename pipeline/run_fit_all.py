@@ -39,11 +39,23 @@ _parser.add_argument("--launched-by", default="script", choices=["script", "agen
 _parser.add_argument("--agent-name", default="")
 _parser.add_argument("--agent-version", default="")
 _parser.add_argument("--agent-workflow", default="")
+_parser.add_argument("--input-dir", default=None,
+                     help="directory containing Run{N}_SelectionResult.npz "
+                          "(overrides config DATA_INPUT_PATH)")
+_parser.add_argument("--out-dir", default=None,
+                     help="output root (default: <project>/output/<timestamp>); "
+                          "when given, writes directly into this directory")
 _args, _unknown = _parser.parse_known_args()
+
+# Overrides: input data dir + output root
+if _args.input_dir:
+    DATA_INPUT_PATH = _args.input_dir
+    print(f"[Info] DATA_INPUT_PATH overridden: {DATA_INPUT_PATH}")
 
 # Output directory
 _timestamp = time.strftime("%Y%m%d_%H%M%S")
-OUTPUT_DIR = PROJECT_ROOT / "output" / _timestamp
+OUTPUT_DIR = (Path(_args.out_dir) if _args.out_dir
+              else PROJECT_ROOT / "output" / _timestamp)
 OUTPUT_RES_DIR = OUTPUT_DIR / "results"
 OUTPUT_FIG_DIR = OUTPUT_DIR / "figures"
 OUTPUT_RES_DIR.mkdir(parents=True, exist_ok=True)
