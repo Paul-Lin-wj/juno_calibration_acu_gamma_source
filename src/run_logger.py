@@ -282,7 +282,7 @@ class RunLogger:
                 continue
             if "__pycache__" in rel.parts:
                 continue
-            if path.name.endswith(".pyc") or path.name.endswith(".egg-info"):
+            if path.name.endswith(".pyc") or                path.name.endswith(".egg-info") or                path.name.endswith(".orig_backup"):
                 continue
             yield rel
 
